@@ -3,8 +3,10 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/athom/namepicker"
+	"math/rand"
 )
 
 type UnitCreationSystem struct {
@@ -25,9 +27,8 @@ func (ucs *UnitCreationSystem) Update(dt float32) {
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
 func (ucs *UnitCreationSystem) AddUnit() {
-	unit := entities.NewUnit(&engo.Point{40, 50})
-	entity := common.Renderable(unit)
-	aentity := common.Animationable(unit)
-	AddToRenderSystem(ucs.World, &entity)
-	AddToAnimationSystem(ucs.World, &aentity)
+	unit := entities.NewUnit(&engo.Point{rand.Float32() * 500, rand.Float32() * 500})
+	fmt.Println("name of the new unit is", namepicker.RandomName())
+	AddToRenderSystem(ucs.World, unit)
+	AddToAnimationSystem(ucs.World, unit)
 }

@@ -24,7 +24,6 @@ func NewUnit(point *engo.Point) *Unit {
 
 	animationComponent := common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 	animationComponent.AddDefaultAnimation(idleAnimation)
-
 	return &Unit{
 		Name:        namepicker.RandomName(),
 		BasicEntity: ecs.NewBasic(),
