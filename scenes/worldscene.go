@@ -12,7 +12,7 @@ type WorldScene struct{}
 func (*WorldScene) Type() string { return "myGame" }
 
 func (*WorldScene) Preload() {
-	engo.Files.Load("models/sheet_hero_idle.png", "models/hero.gif")
+	engo.Files.Load("models/sheet_hero_idle.png", "models/sheet_hero_stab.png")
 }
 
 func (scene *WorldScene) Setup(updater engo.Updater) {
@@ -26,9 +26,10 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(common.NewKeyboardScroller(400, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 	world.AddSystem(&common.EdgeScroller{400, 20})
 	world.AddSystem(&common.MouseZoomer{-0.125})
+	world.AddSystem(&common.AnimationSystem{})
 
 	world.AddSystem(&systems.UnitCreationSystem{})
 
-	engo.Input.RegisterButton("AddCity", engo.KeyC)
+	engo.Input.RegisterButton("CreateUnit", engo.KeyC)
 
 }

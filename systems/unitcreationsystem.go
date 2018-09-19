@@ -4,7 +4,6 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
@@ -18,7 +17,7 @@ func (ucs *UnitCreationSystem) New(world *ecs.World) {
 
 func (ucs *UnitCreationSystem) Update(dt float32) {
 
-	if engo.Input.Button("AddCity").JustPressed() {
+	if engo.Input.Button("CreateUnit").JustPressed() {
 		ucs.AddUnit()
 	}
 }
@@ -26,8 +25,9 @@ func (ucs *UnitCreationSystem) Update(dt float32) {
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
 func (ucs *UnitCreationSystem) AddUnit() {
-	fmt.Println("yyyeeesccc")
 	unit := entities.NewUnit(&engo.Point{40, 50})
 	entity := common.Renderable(unit)
+	aentity := common.Animationable(unit)
 	AddToRenderSystem(ucs.World, &entity)
+	AddToAnimationSystem(ucs.World, &aentity)
 }
