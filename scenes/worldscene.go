@@ -12,7 +12,7 @@ type WorldScene struct{}
 func (*WorldScene) Type() string { return "myGame" }
 
 func (*WorldScene) Preload() {
-	engo.Files.Load("models/sheet_hero_idle.png", "models/sheet_hero_stab.png")
+	engo.Files.Load("models/hero_sprite.png")
 }
 
 func (scene *WorldScene) Setup(updater engo.Updater) {
