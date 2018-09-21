@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 )
@@ -16,7 +17,8 @@ type MouseTracker struct {
 type SelectionSystem struct {
 	*ecs.World
 	MouseTracker
-	Units []*entities.Unit
+	Units        []*entities.Unit
+	SelectedUnit *entities.Unit
 }
 
 func (ss *SelectionSystem) New(world *ecs.World) {
@@ -37,13 +39,27 @@ func (ss *SelectionSystem) Update(dt float32) {
 		return
 	}
 	if engo.Input.Mouse.Button == engo.MouseButtonLeft {
-		fmt.Println("yoooo at", engo.Point{ss.MouseTracker.MouseX, ss.MouseTracker.MouseY})
+		if unit, err := ss.findUnitUnderMouse(); err == nil {
+			fmt.Println("Selecting unit", unit.Name)
+			ss.SelectedUnit = unit
+		}
+
 	} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-		fmt.Println("neeeey at", ss.MouseTracker.MouseX, ss.MouseTracker.MouseY, len(ss.Units))
-		for _, unit := range ss.Units {
-			unit.AnimationComponent.SelectAnimationByName("stab")
+		if ss.SelectedUnit != nil {
+			ss.SelectedUnit.AnimationComponent.SelectAnimationByName("stab")
 		}
 	}
+}
+
+func (ss *SelectionSystem) findUnitUnderMouse() (*entities.Unit, error) {
+	for _, unit := range ss.Units {
+		xDelta := ss.MouseTracker.MouseX - unit.GetSpaceComponent().Position.X
+		yDelta := ss.MouseTracker.MouseY - unit.GetSpaceComponent().Position.Y
+		if xDelta > 0 && xDelta < entities.UNITSIZE && yDelta > 0 && yDelta < entities.UNITSIZE {
+			return unit, nil
+		}
+	}
+	return nil, errors.New("No unit Found")
 }
 
 func (ss *SelectionSystem) Remove(e ecs.BasicEntity) {}

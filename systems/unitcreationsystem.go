@@ -5,7 +5,6 @@ import (
 	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
-	"github.com/athom/namepicker"
 	"math/rand"
 )
 
@@ -28,7 +27,7 @@ func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
 func (ucs *UnitCreationSystem) AddUnit() {
 	unit := entities.NewUnit(&engo.Point{rand.Float32() * 500, rand.Float32() * 500})
-	fmt.Println("name of the new unit is", namepicker.RandomName())
+	fmt.Println("name of the new unit is", unit.Name)
 	AddToRenderSystem(ucs.World, unit)
 	AddToAnimationSystem(ucs.World, unit)
 	AddToSelectionSystem(ucs.World, unit)
