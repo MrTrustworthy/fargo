@@ -19,10 +19,10 @@ func (ss *SelectionSystem) Add(unit *entities.Unit) {
 
 func (ss *SelectionSystem) New(world *ecs.World) {
 
-	engo.Mailbox.Listen(INPUT_EVENT_NAME, ss.getHandleSelectEvent())
+	engo.Mailbox.Listen(INPUT_EVENT_NAME, ss.getHandleInputEvent())
 }
 
-func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
+func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		imsg, ok := msg.(InputEvent)
 		if !ok || imsg.Action != "Select" {
@@ -31,6 +31,9 @@ func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
 		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
 			ss.SelectedUnit = unit
 			fmt.Println("Selected unit with name", unit.Name)
+		} else if ss.SelectedUnit != nil {
+			fmt.Println("Deselected unit with name", ss.SelectedUnit.Name)
+			ss.SelectedUnit = nil
 		}
 	}
 }

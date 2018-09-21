@@ -5,7 +5,6 @@ import (
 	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
-	"math/rand"
 )
 
 type UnitCreationSystem struct {
@@ -14,19 +13,28 @@ type UnitCreationSystem struct {
 
 func (ucs *UnitCreationSystem) New(world *ecs.World) {
 	ucs.World = world
+	engo.Mailbox.Listen(INPUT_EVENT_NAME, ucs.getHandleInputEvent())
 }
 
-func (ucs *UnitCreationSystem) Update(dt float32) {
+func (ucs *UnitCreationSystem) Update(dt float32) {}
 
-	if engo.Input.Button("CreateUnit").JustPressed() {
-		ucs.AddUnit()
+func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
+		imsg, ok := msg.(InputEvent)
+		if !ok || imsg.Action != "CreateUnit" {
+			return
+		}
+		ucs.createRandomUnit(imsg.MouseTracker)
 	}
 }
 
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
-func (ucs *UnitCreationSystem) AddUnit() {
-	unit := entities.NewUnit(&engo.Point{rand.Float32() * 500, rand.Float32() * 500})
+func (ucs *UnitCreationSystem) createRandomUnit(tracker MouseTracker) {
+	unit := entities.NewUnit(&engo.Point{
+		X: tracker.MouseX - entities.UNITSIZE/2,
+		Y: tracker.MouseY - entities.UNITSIZE/2,
+	})
 	fmt.Println("name of the new unit is", unit.Name)
 	AddToRenderSystem(ucs.World, unit)
 	AddToAnimationSystem(ucs.World, unit)
