@@ -3,58 +3,44 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
 	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
-type MouseTracker struct {
-	ecs.BasicEntity
-	common.MouseComponent
-}
-
 type SelectionSystem struct {
-	*ecs.World
-	MouseTracker
 	Units        []*entities.Unit
 	SelectedUnit *entities.Unit
-}
-
-func (ss *SelectionSystem) New(world *ecs.World) {
-	ss.MouseTracker = MouseTracker{
-		BasicEntity:    ecs.NewBasic(),
-		MouseComponent: common.MouseComponent{Track: true},
-	}
-	AddToMouseSystem(world, &ss.MouseTracker)
 }
 
 func (ss *SelectionSystem) Add(unit *entities.Unit) {
 	ss.Units = append(ss.Units, unit)
 }
 
-func (ss *SelectionSystem) Update(dt float32) {
+func (ss *SelectionSystem) New(world *ecs.World) {
 
-	if engo.Input.Mouse.Action != engo.Press {
-		return
-	}
-	if engo.Input.Mouse.Button == engo.MouseButtonLeft {
-		if unit, err := ss.findUnitUnderMouse(); err == nil {
-			fmt.Println("Selecting unit", unit.Name)
-			ss.SelectedUnit = unit
+	engo.Mailbox.Listen(INPUT_EVENT_NAME, ss.getHandleSelectEvent())
+}
+
+func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
+		imsg, ok := msg.(InputEvent)
+		if !ok || imsg.Action != "Select" {
+			return
 		}
-
-	} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-		if ss.SelectedUnit != nil {
-			ss.SelectedUnit.AnimationComponent.SelectAnimationByName("stab")
+		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
+			ss.SelectedUnit = unit
+			fmt.Println("Selected unit with name", unit.Name)
 		}
 	}
 }
 
-func (ss *SelectionSystem) findUnitUnderMouse() (*entities.Unit, error) {
+func (ss *SelectionSystem) Update(dt float32) {}
+
+func (ss *SelectionSystem) findUnitUnderMouse(tracker *MouseTracker) (*entities.Unit, error) {
 	for _, unit := range ss.Units {
-		xDelta := ss.MouseTracker.MouseX - unit.GetSpaceComponent().Position.X
-		yDelta := ss.MouseTracker.MouseY - unit.GetSpaceComponent().Position.Y
+		xDelta := tracker.MouseX - unit.GetSpaceComponent().Position.X
+		yDelta := tracker.MouseY - unit.GetSpaceComponent().Position.Y
 		if xDelta > 0 && xDelta < entities.UNITSIZE && yDelta > 0 && yDelta < entities.UNITSIZE {
 			return unit, nil
 		}

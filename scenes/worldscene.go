@@ -30,6 +30,7 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 
 	world.AddSystem(&systems.UnitCreationSystem{})
 	world.AddSystem(&systems.SelectionSystem{})
+	world.AddSystem(&systems.InputSystem{})
 
 	engo.Input.RegisterButton("CreateUnit", engo.KeyC)
 
