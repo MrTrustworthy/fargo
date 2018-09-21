@@ -35,19 +35,19 @@ func (is *InputSystem) New(world *ecs.World) {
 
 func (is *InputSystem) Update(dt float32) {
 	// TODO write a system that takes all events in the mailbox and logs them
-	message := InputEvent{MouseTracker: is.MouseTracker}
+	event := InputEvent{MouseTracker: is.MouseTracker}
 	if engo.Input.Mouse.Action == engo.Press {
 
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
-			message.Action = "Select"
+			event.Action = "Select"
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-			message.Action = "Attack"
+			event.Action = "Attack"
 		}
 
 	} else if engo.Input.Button("CreateUnit").JustPressed() {
-		message.Action = "CreateUnit"
+		event.Action = "CreateUnit"
 	}
-	engo.Mailbox.Dispatch(message)
+	engo.Mailbox.Dispatch(event)
 
 }
 

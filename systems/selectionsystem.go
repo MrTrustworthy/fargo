@@ -4,9 +4,17 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"errors"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 )
+
+const SELECT_EVENT_NAME = "SelectionEvent"
+
+type SelectionEvent struct {
+	Action string
+	*entities.Unit
+}
+
+func (se SelectionEvent) Type() string { return SELECT_EVENT_NAME }
 
 type SelectionSystem struct {
 	Units        []*entities.Unit
@@ -20,6 +28,8 @@ func (ss *SelectionSystem) Add(unit *entities.Unit) {
 func (ss *SelectionSystem) New(world *ecs.World) {
 
 	engo.Mailbox.Listen(INPUT_EVENT_NAME, ss.getHandleInputEvent())
+	engo.Mailbox.Listen(SELECT_EVENT_NAME, ss.getHandleSelectEvent())
+
 }
 
 func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
@@ -28,12 +38,30 @@ func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
 		if !ok || imsg.Action != "Select" {
 			return
 		}
+
+		if ss.SelectedUnit != nil {
+			deselectedUnit := ss.SelectedUnit
+			ss.SelectedUnit = nil
+			engo.Mailbox.Dispatch(SelectionEvent{Action: "Deselect", Unit: deselectedUnit})
+		}
+
 		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
 			ss.SelectedUnit = unit
-			fmt.Println("Selected unit with name", unit.Name)
-		} else if ss.SelectedUnit != nil {
-			fmt.Println("Deselected unit with name", ss.SelectedUnit.Name)
-			ss.SelectedUnit = nil
+			engo.Mailbox.Dispatch(SelectionEvent{Action: "Select", Unit: unit})
+		}
+	}
+}
+
+func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
+		imsg, ok := msg.(SelectionEvent)
+		if !ok {
+			return
+		}
+		if imsg.Action == "Select" {
+			imsg.Unit.AnimationComponent.SelectAnimationByName("jump")
+		} else if imsg.Action == "Deselect" {
+			imsg.Unit.AnimationComponent.SelectAnimationByName("dead")
 		}
 	}
 }
