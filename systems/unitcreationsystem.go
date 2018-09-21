@@ -31,4 +31,5 @@ func (ucs *UnitCreationSystem) AddUnit() {
 	fmt.Println("name of the new unit is", namepicker.RandomName())
 	AddToRenderSystem(ucs.World, unit)
 	AddToAnimationSystem(ucs.World, unit)
+	AddToSelectionSystem(ucs.World, unit)
 }
