@@ -30,7 +30,7 @@ func (uis *UnitInteractionSystem) New(world *ecs.World) {
 func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		imsg, ok := msg.(InputEvent)
-		if !ok || imsg.Action != "Interact" {
+		if !ok || imsg.Action != INPUT_EVENT_ACTION_INTERACT {
 			return
 		}
 
