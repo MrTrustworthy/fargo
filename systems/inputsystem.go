@@ -6,7 +6,12 @@ import (
 	"engo.io/engo/common"
 )
 
-const INPUT_EVENT_NAME = "InputEvent"
+const (
+	INPUT_EVENT_NAME              = "InputEvent"
+	INPUT_EVENT_ACTION_SELECT     = "Select"
+	INPUT_EVENT_ACTION_INTERACT   = "Interact"
+	INPUT_EVENT_ACTION_CREATEUNIT = "CreateUnit"
+)
 
 type InputEvent struct {
 	MouseTracker
@@ -39,13 +44,13 @@ func (is *InputSystem) Update(dt float32) {
 	if engo.Input.Mouse.Action == engo.Press {
 
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
-			event.Action = "Select"
+			event.Action = INPUT_EVENT_ACTION_SELECT
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-			event.Action = "Interact"
+			event.Action = INPUT_EVENT_ACTION_INTERACT
 		}
 
-	} else if engo.Input.Button("CreateUnit").JustPressed() {
-		event.Action = "CreateUnit"
+	} else if engo.Input.Button(INPUT_EVENT_ACTION_CREATEUNIT).JustPressed() {
+		event.Action = INPUT_EVENT_ACTION_CREATEUNIT
 	}
 	engo.Mailbox.Dispatch(event)
 

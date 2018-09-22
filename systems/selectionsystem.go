@@ -7,7 +7,11 @@ import (
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
-const SELECT_EVENT_NAME = "SelectionEvent"
+const (
+	SELECT_EVENT_NAME            = "SelectionEvent"
+	SELECT_EVENT_ACTION_SELECTED = "Selected"
+	SELECT_EVENT_ACTION_DESELECT = "Deselected"
+)
 
 type SelectionEvent struct {
 	Action string
@@ -35,33 +39,33 @@ func (ss *SelectionSystem) New(world *ecs.World) {
 func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		imsg, ok := msg.(InputEvent)
-		if !ok || imsg.Action != "Select" {
+		if !ok || imsg.Action != INPUT_EVENT_ACTION_SELECT {
 			return
 		}
 
 		if ss.SelectedUnit != nil {
 			deselectedUnit := ss.SelectedUnit
 			ss.SelectedUnit = nil
-			engo.Mailbox.Dispatch(SelectionEvent{Action: "Deselect", Unit: deselectedUnit})
+			engo.Mailbox.Dispatch(SelectionEvent{Action: SELECT_EVENT_ACTION_DESELECT, Unit: deselectedUnit})
 		}
 
 		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
 			ss.SelectedUnit = unit
-			engo.Mailbox.Dispatch(SelectionEvent{Action: "Select", Unit: unit})
+			engo.Mailbox.Dispatch(SelectionEvent{Action: SELECT_EVENT_ACTION_SELECTED, Unit: unit})
 		}
 	}
 }
 
 func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(SelectionEvent)
+		smsg, ok := msg.(SelectionEvent)
 		if !ok {
 			return
 		}
-		if imsg.Action == "Select" {
-			imsg.Unit.AnimationComponent.SelectAnimationByName("jump")
-		} else if imsg.Action == "Deselect" {
-			imsg.Unit.AnimationComponent.SelectAnimationByName("duck")
+		if smsg.Action == SELECT_EVENT_ACTION_SELECTED {
+			smsg.Unit.AnimationComponent.SelectAnimationByName("jump")
+		} else if smsg.Action == SELECT_EVENT_ACTION_DESELECT {
+			smsg.Unit.AnimationComponent.SelectAnimationByName("duck")
 		}
 	}
 }
