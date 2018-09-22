@@ -16,13 +16,13 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
-	engo.Mailbox.Listen(INPUT_EVENT_NAME, ums.getHandleInputEvent())
+	engo.Mailbox.Listen(ACTION_EVENT_NAME, ums.getHandleActionEvent())
 }
 
-func (ums *UnitMovementSystem) getHandleInputEvent() func(msg engo.Message) {
+func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(InputEvent)
-		if !ok || imsg.Action != "Move" {
+		amsg, ok := msg.(ActionEvent)
+		if !ok || amsg.Action != "Move" {
 			return
 		}
 		if ums.CurrentTarget != nil || ums.CurrentUnit != nil {
@@ -33,8 +33,8 @@ func (ums *UnitMovementSystem) getHandleInputEvent() func(msg engo.Message) {
 		if unit := GetCurrentlySelectedUnit(ums.world); unit != nil {
 			ums.CurrentUnit = unit
 			ums.CurrentTarget = &engo.Point{
-				X: imsg.MouseTracker.MouseX + entities.UNIT_CENTER_OFFSET.X,
-				Y: imsg.MouseTracker.MouseY + entities.UNIT_CENTER_OFFSET.Y,
+				X: amsg.Target.X + entities.UNIT_CENTER_OFFSET.X,
+				Y: amsg.Target.Y + entities.UNIT_CENTER_OFFSET.Y,
 			}
 			ums.CurrentPath = InterpolateBetween(
 				&ums.CurrentUnit.GetSpaceComponent().Position,
@@ -48,7 +48,7 @@ func (ums *UnitMovementSystem) getHandleInputEvent() func(msg engo.Message) {
 }
 
 func (ums *UnitMovementSystem) Update(dt float32) {
-	if ums.CurrentTarget == nil || ums.CurrentUnit == nil || ums.CurrentPath == nil {
+	if ums.IsIdle() {
 		return
 	}
 	nextPos := ums.CurrentPath[0]
@@ -62,6 +62,10 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 		ums.CurrentPath = nil
 	}
 
+}
+
+func (ums *UnitMovementSystem) IsIdle() bool {
+	return ums.CurrentTarget == nil && ums.CurrentUnit == nil && ums.CurrentPath == nil
 }
 
 func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {

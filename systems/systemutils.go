@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo/common"
+	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
@@ -50,4 +51,14 @@ func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
 		}
 	}
 	return nil
+}
+
+func FindUnitUnderMouse(world *ecs.World, tracker *MouseTracker) (*entities.Unit, error) {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *SelectionSystem:
+			return sys.findUnitUnderMouse(tracker)
+		}
+	}
+	return nil, errors.New("No SelectionSystem found")
 }
