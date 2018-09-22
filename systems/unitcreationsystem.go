@@ -32,8 +32,8 @@ func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
 func (ucs *UnitCreationSystem) createRandomUnit(tracker MouseTracker) {
 	unit := entities.NewUnit(&engo.Point{
-		X: tracker.MouseX - entities.UNITSIZE/2,
-		Y: tracker.MouseY - entities.UNITSIZE/2,
+		X: tracker.MouseX + entities.UNIT_CENTER_OFFSET.X,
+		Y: tracker.MouseY + entities.UNIT_CENTER_OFFSET.Y,
 	})
 	fmt.Println("name of the new unit is", unit.Name)
 	AddToRenderSystem(ucs.World, unit)

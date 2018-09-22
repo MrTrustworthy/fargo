@@ -33,10 +33,15 @@ func (ums *UnitMovementSystem) getHandleInputEvent() func(msg engo.Message) {
 		if unit := GetCurrentlySelectedUnit(ums.world); unit != nil {
 			ums.CurrentUnit = unit
 			ums.CurrentTarget = &engo.Point{
-				X: imsg.MouseTracker.MouseX - entities.UNITSIZE/2,
-				Y: imsg.MouseTracker.MouseY - entities.UNITSIZE/2,
+				X: imsg.MouseTracker.MouseX + entities.UNIT_CENTER_OFFSET.X,
+				Y: imsg.MouseTracker.MouseY + entities.UNIT_CENTER_OFFSET.Y,
 			}
-			ums.CurrentPath = InterpolateBetween(&ums.CurrentUnit.GetSpaceComponent().Position, ums.CurrentTarget)
+			ums.CurrentPath = InterpolateBetween(
+				&ums.CurrentUnit.GetSpaceComponent().Position,
+				ums.CurrentTarget,
+				ums.CurrentUnit.Speed,
+			)
+			ums.CurrentUnit.AnimationComponent.SelectAnimationByName("walk")
 		}
 
 	}
@@ -51,6 +56,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	ums.CurrentUnit.Position = nextPos
 
 	if len(ums.CurrentPath) == 0 {
+		ums.CurrentUnit.AnimationComponent.SelectAnimationByName("idle")
 		ums.CurrentUnit = nil
 		ums.CurrentTarget = nil
 		ums.CurrentPath = nil
@@ -58,8 +64,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 
 }
 
-func InterpolateBetween(a, b *engo.Point) []engo.Point {
-	stepSize := float32(5.0)
+func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {
 	dist := a.PointDistance(*b)
 
 	var points []engo.Point
