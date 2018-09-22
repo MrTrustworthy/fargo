@@ -12,7 +12,7 @@ type WorldScene struct{}
 func (*WorldScene) Type() string { return "myGame" }
 
 func (*WorldScene) Preload() {
-	engo.Files.Load("models/hero_sprite.png")
+	engo.Files.Load("models/hero_sprite.png", "fonts/Roboto-Regular.ttf")
 }
 
 func (scene *WorldScene) Setup(updater engo.Updater) {
@@ -31,6 +31,7 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.UnitCreationSystem{})
 	world.AddSystem(&systems.SelectionSystem{})
 	world.AddSystem(&systems.InputSystem{})
+	world.AddSystem(&systems.UserInterfaceSystem{})
 
 	engo.Input.RegisterButton("CreateUnit", engo.KeyC)
 

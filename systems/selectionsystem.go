@@ -61,7 +61,7 @@ func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
 		if imsg.Action == "Select" {
 			imsg.Unit.AnimationComponent.SelectAnimationByName("jump")
 		} else if imsg.Action == "Deselect" {
-			imsg.Unit.AnimationComponent.SelectAnimationByName("dead")
+			imsg.Unit.AnimationComponent.SelectAnimationByName("duck")
 		}
 	}
 }
