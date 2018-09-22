@@ -41,3 +41,13 @@ func AddToSelectionSystem(world *ecs.World, unit *entities.Unit) {
 		}
 	}
 }
+
+func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *SelectionSystem:
+			return sys.SelectedUnit
+		}
+	}
+	return nil
+}

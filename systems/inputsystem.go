@@ -41,7 +41,7 @@ func (is *InputSystem) Update(dt float32) {
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
 			event.Action = "Select"
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-			event.Action = "Attack"
+			event.Action = "Move"
 		}
 
 	} else if engo.Input.Button("CreateUnit").JustPressed() {

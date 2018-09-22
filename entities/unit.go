@@ -25,13 +25,14 @@ var deadAnimation = &common.Animation{Name: "dead", Frames: []int{21, 22, 23, 24
 var duckAnimation = &common.Animation{Name: "duck", Frames: []int{29, 30, 31, 32, 33, 34}}
 var spawnAnimation = &common.Animation{Name: "spawn", Frames: []int{35, 36, 37, 38, 39, 40}}
 var upstabAnimation = &common.Animation{Name: "upstab", Frames: []int{41, 42, 43, 44, 45}}
+var allAnimations = []*common.Animation{idleAnimation, jumpAnimation, stabAnimation, walkAnimation, deadAnimation, duckAnimation, spawnAnimation, upstabAnimation}
 
 func NewUnit(point *engo.Point) *Unit {
 
 	spriteSheet := common.NewSpritesheetFromFile("models/hero_sprite.png", UNITSIZE, UNITSIZE)
 
 	animationComponent := common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
-	animationComponent.AddAnimations([]*common.Animation{idleAnimation, jumpAnimation, stabAnimation, walkAnimation, deadAnimation, duckAnimation, spawnAnimation, upstabAnimation})
+	animationComponent.AddAnimations(allAnimations)
 	animationComponent.AddDefaultAnimation(idleAnimation)
 	animationComponent.SelectAnimationByName("spawn")
 
