@@ -131,6 +131,7 @@ func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {
 
 // Can be used to shorten a given path so that the last point is at least stopDistance from the target
 func ShortenPathToStopDistance(plannedPath []engo.Point, target *engo.Point, stopDistance float32) []engo.Point {
+
 	maxOvershoot := float32(0.01) // in order to balance out floating point comparison
 	var points []engo.Point
 	for _, pathPoint := range plannedPath {
@@ -140,6 +141,12 @@ func ShortenPathToStopDistance(plannedPath []engo.Point, target *engo.Point, sto
 			break
 		}
 		points = append(points, pathPoint)
+	}
+
+	// even a shortened path must always contain at least one point - the origin of the movement itself
+	// see InterpolateBetween() for details
+	if len(points) == 0 {
+		points = []engo.Point{plannedPath[0]}
 	}
 
 	return points
