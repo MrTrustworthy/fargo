@@ -62,6 +62,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 
 	// stop here if movement is not yet finished
 	if len(ums.CurrentPath) > 0 {
+		engo.Mailbox.Dispatch(events.MovementEvent{ums.CurrentUnit, events.MOVEMENT_EVENT_ACTION_STEP})
 		return
 	}
 

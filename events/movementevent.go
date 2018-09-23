@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	MOVEMENT_EVENT_ACTION_FINISHED = "MoveCompleted"
 	MOVEMENT_EVENT_NAME            = "InteractionEvent"
+	MOVEMENT_EVENT_ACTION_FINISHED = "MoveCompleted"
+	MOVEMENT_EVENT_ACTION_STEP     = "MoveStep"
 )
 
 type MovementEvent struct {
