@@ -5,6 +5,7 @@ import (
 	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/MrTrustworthy/fargo/events"
 )
 
 type UnitCreationSystem struct {
@@ -13,14 +14,14 @@ type UnitCreationSystem struct {
 
 func (ucs *UnitCreationSystem) New(world *ecs.World) {
 	ucs.World = world
-	engo.Mailbox.Listen(INPUT_EVENT_NAME, ucs.getHandleInputEvent())
+	engo.Mailbox.Listen(events.INPUT_EVENT_NAME, ucs.getHandleInputEvent())
 }
 
 func (ucs *UnitCreationSystem) Update(dt float32) {}
 
 func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(InputEvent)
+		imsg, ok := msg.(events.InputEvent)
 		if !ok || imsg.Action != "CreateUnit" {
 			return
 		}
@@ -30,7 +31,7 @@ func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
 
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
-func (ucs *UnitCreationSystem) createRandomUnit(tracker MouseTracker) {
+func (ucs *UnitCreationSystem) createRandomUnit(tracker events.MouseTracker) {
 	unit := entities.NewUnit(&engo.Point{
 		X: tracker.MouseX + entities.UNIT_CENTER_OFFSET.X,
 		Y: tracker.MouseY + entities.UNIT_CENTER_OFFSET.Y,

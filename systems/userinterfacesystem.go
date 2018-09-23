@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/MrTrustworthy/fargo/events"
 )
 
 type UserInterfaceSystem struct {
@@ -16,13 +17,13 @@ func (uis *UserInterfaceSystem) New(world *ecs.World) {
 	AddToRenderSystem(world, uis.MainHUD)
 	uis.SelectText = entities.NewHUDText()
 	AddToRenderSystem(world, uis.SelectText)
-	engo.Mailbox.Listen(SELECT_EVENT_NAME, uis.getHandleSelectEvent())
+	engo.Mailbox.Listen(events.SELECT_EVENT_NAME, uis.getHandleSelectEvent())
 
 }
 
 func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(SelectionEvent)
+		imsg, ok := msg.(events.SelectionEvent)
 		if !ok {
 			return
 		}

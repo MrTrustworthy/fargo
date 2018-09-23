@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/systems"
 )
 
@@ -35,6 +36,6 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.UnitMovementSystem{})
 	world.AddSystem(&systems.UnitInteractionSystem{})
 
-	engo.Input.RegisterButton(systems.INPUT_EVENT_ACTION_CREATEUNIT, engo.KeyC)
+	engo.Input.RegisterButton(events.INPUT_EVENT_ACTION_CREATEUNIT, engo.KeyC)
 
 }

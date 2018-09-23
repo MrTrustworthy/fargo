@@ -5,6 +5,7 @@ import (
 	"engo.io/engo/common"
 	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/MrTrustworthy/fargo/events"
 )
 
 func AddToRenderSystem(world *ecs.World, renderable common.Renderable) {
@@ -25,7 +26,7 @@ func AddToAnimationSystem(world *ecs.World, anim common.Animationable) {
 	}
 }
 
-func AddToMouseSystem(world *ecs.World, tracker *MouseTracker) {
+func AddToMouseSystem(world *ecs.World, tracker *events.MouseTracker) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *common.MouseSystem:
@@ -53,7 +54,7 @@ func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
 	return nil
 }
 
-func FindUnitUnderMouse(world *ecs.World, tracker *MouseTracker) (*entities.Unit, error) {
+func FindUnitUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Unit, error) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *SelectionSystem:

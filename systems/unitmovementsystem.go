@@ -5,19 +5,8 @@ import (
 	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/MrTrustworthy/fargo/events"
 )
-
-const (
-	MOVEMENT_EVENT_ACTION_FINISHED = "MoveCompleted"
-	MOVEMENT_EVENT_NAME            = "InteractionEvent"
-)
-
-type MovementEvent struct {
-	*entities.Unit
-	Action string
-}
-
-func (ae MovementEvent) Type() string { return MOVEMENT_EVENT_NAME }
 
 type UnitMovementSystem struct {
 	world         *ecs.World
@@ -28,13 +17,13 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
-	engo.Mailbox.Listen(INTERACTION_EVENT_NAME, ums.getHandleActionEvent())
+	engo.Mailbox.Listen(events.INTERACTION_EVENT_NAME, ums.getHandleActionEvent())
 }
 
 func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		amsg, ok := msg.(InteractionEvent)
-		if !ok || amsg.Action != INTERACTION_EVENT_ACTION_MOVE {
+		amsg, ok := msg.(events.InteractionEvent)
+		if !ok || amsg.Action != events.INTERACTION_EVENT_ACTION_MOVE {
 			return
 		}
 		if ums.CurrentTarget != nil || ums.CurrentUnit != nil {
@@ -80,7 +69,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	oldUnit := ums.CurrentUnit
 	ums.SetIdle()
 	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	engo.Mailbox.Dispatch(MovementEvent{oldUnit, MOVEMENT_EVENT_ACTION_FINISHED})
+	engo.Mailbox.Dispatch(events.MovementEvent{oldUnit, events.MOVEMENT_EVENT_ACTION_FINISHED})
 }
 
 func (ums *UnitMovementSystem) IsIdle() bool {
