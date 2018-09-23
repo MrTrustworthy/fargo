@@ -23,6 +23,7 @@ type Unit struct {
 const UNITSIZE = 64
 
 // describes the offset we need to add to a given unit position to get the "visual" center of the unit
+// TODO check if we can use SpaceComponent.SetCenter() instead!
 var UNIT_CENTER_OFFSET = engo.Point{
 	X: -UNITSIZE / 2,
 	Y: -UNITSIZE / 1.5,

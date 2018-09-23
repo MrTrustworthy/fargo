@@ -31,12 +31,12 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&common.AnimationSystem{})
 
 	world.AddSystem(&systems.UnitCreationSystem{})
-	world.AddSystem(&systems.SelectionSystem{})
+	world.AddSystem(&systems.UnitTrackingSystem{})
 	world.AddSystem(&systems.InputSystem{})
 	world.AddSystem(&systems.UserInterfaceSystem{})
 	world.AddSystem(&systems.UnitMovementSystem{})
 	world.AddSystem(&systems.UnitInteractionSystem{})
-	world.AddSystem(&systems.CollisionSystem{})
+	world.AddSystem(&systems.UnitCollisionSystem{})
 
 	engo.Input.RegisterButton(events.INPUT_EVENT_ACTION_CREATEUNIT, engo.KeyC)
 

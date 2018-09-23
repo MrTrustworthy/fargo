@@ -8,23 +8,23 @@ import (
 	"github.com/MrTrustworthy/fargo/events"
 )
 
-type SelectionSystem struct {
+type UnitTrackingSystem struct {
 	Units        []*entities.Unit
 	SelectedUnit *entities.Unit
 }
 
-func (ss *SelectionSystem) Add(unit *entities.Unit) {
+func (ss *UnitTrackingSystem) Add(unit *entities.Unit) {
 	ss.Units = append(ss.Units, unit)
 }
 
-func (ss *SelectionSystem) New(world *ecs.World) {
+func (ss *UnitTrackingSystem) New(world *ecs.World) {
 
 	engo.Mailbox.Listen(events.INPUT_EVENT_NAME, ss.getHandleInputEvent())
 	engo.Mailbox.Listen(events.SELECT_EVENT_NAME, ss.getHandleSelectEvent())
 
 }
 
-func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
+func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		imsg, ok := msg.(events.InputEvent)
 		if !ok || imsg.Action != events.INPUT_EVENT_ACTION_SELECT {
@@ -44,7 +44,7 @@ func (ss *SelectionSystem) getHandleInputEvent() func(msg engo.Message) {
 	}
 }
 
-func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
+func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		smsg, ok := msg.(events.SelectionEvent)
 		if !ok {
@@ -58,9 +58,9 @@ func (ss *SelectionSystem) getHandleSelectEvent() func(msg engo.Message) {
 	}
 }
 
-func (ss *SelectionSystem) Update(dt float32) {}
+func (ss *UnitTrackingSystem) Update(dt float32) {}
 
-func (ss *SelectionSystem) findUnitUnderMouse(tracker *events.MouseTracker) (*entities.Unit, error) {
+func (ss *UnitTrackingSystem) findUnitUnderMouse(tracker *events.MouseTracker) (*entities.Unit, error) {
 	for _, unit := range ss.Units {
 		xDelta := tracker.MouseX - unit.GetSpaceComponent().Position.X
 		yDelta := tracker.MouseY - unit.GetSpaceComponent().Position.Y
@@ -71,4 +71,4 @@ func (ss *SelectionSystem) findUnitUnderMouse(tracker *events.MouseTracker) (*en
 	return nil, errors.New("No unit Found")
 }
 
-func (ss *SelectionSystem) Remove(e ecs.BasicEntity) {}
+func (ss *UnitTrackingSystem) Remove(e ecs.BasicEntity) {}

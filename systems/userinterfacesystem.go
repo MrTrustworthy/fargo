@@ -27,9 +27,9 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
 		if !ok {
 			return
 		}
-		if imsg.Action == "Select" {
+		if imsg.Action == events.SELECT_EVENT_ACTION_SELECTED {
 			uis.SelectText.SetText("Unit:" + imsg.Unit.Name)
-		} else if imsg.Action == "Deselect" {
+		} else if imsg.Action == events.SELECT_EVENT_ACTION_DESELECT {
 			uis.SelectText.SetText("Unit: None")
 		}
 	}

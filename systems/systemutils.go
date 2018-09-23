@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo/common"
-	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -38,28 +37,31 @@ func AddToMouseSystem(world *ecs.World, tracker *events.MouseTracker) {
 func AddToSelectionSystem(world *ecs.World, unit *entities.Unit) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *SelectionSystem:
+		case *UnitTrackingSystem:
 			sys.Add(unit)
 		}
 	}
 }
 
-func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
+// Those functions are used to get global unit state like all units, selected units, units under mouse etc
+func GetUnitTrackingSystem(world *ecs.World) *UnitTrackingSystem {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *SelectionSystem:
-			return sys.SelectedUnit
+		case *UnitTrackingSystem:
+			return sys
 		}
 	}
 	return nil
 }
 
+func GetAllExistingUnits(world *ecs.World) []*entities.Unit {
+	return GetUnitTrackingSystem(world).Units
+}
+
+func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
+	return GetUnitTrackingSystem(world).SelectedUnit
+}
+
 func FindUnitUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Unit, error) {
-	for _, system := range world.Systems() {
-		switch sys := system.(type) {
-		case *SelectionSystem:
-			return sys.findUnitUnderMouse(tracker)
-		}
-	}
-	return nil, errors.New("No SelectionSystem found")
+	return GetUnitTrackingSystem(world).findUnitUnderMouse(tracker)
 }

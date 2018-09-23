@@ -13,11 +13,14 @@ type UnitMovementSystem struct {
 	CurrentUnit   *entities.Unit
 	CurrentTarget *engo.Point
 	CurrentPath   []engo.Point
+	LastPosition  engo.Point // used to reset the position after a collision
 }
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
 	engo.Mailbox.Listen(events.INTERACTION_EVENT_NAME, ums.getHandleActionEvent())
+	engo.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
+
 }
 
 func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
@@ -26,7 +29,7 @@ func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
 		if !ok || amsg.Action != events.INTERACTION_EVENT_ACTION_MOVE {
 			return
 		}
-		if ums.CurrentTarget != nil || ums.CurrentUnit != nil {
+		if !ums.IsIdle() {
 			fmt.Println("Can't start new movement until old one is finished")
 			return
 		}
@@ -34,6 +37,20 @@ func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
 		if unit := GetCurrentlySelectedUnit(ums.world); unit != nil {
 			ums.InitiateMovement(unit, &amsg.Target)
 		}
+	}
+}
+
+func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
+		cmsg, ok := msg.(events.CollisionEvent)
+		if !ok || cmsg.Action != events.COLLISON_EVENT_ACTION_COLLIDED {
+			return
+		}
+		if ums.IsIdle() {
+			panic("Collision causing movement abort, but there is no moving unit!" + cmsg.AsLogMessage())
+		}
+		ums.ResetToLastPosition()
+		ums.StopMovement()
 	}
 }
 
@@ -58,36 +75,44 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	}
 	nextPos := ums.CurrentPath[0]
 	ums.CurrentPath = ums.CurrentPath[1:]
+	ums.LastPosition = ums.CurrentUnit.Position
 	ums.CurrentUnit.Position = nextPos
 
 	// stop here if movement is not yet finished
 	if len(ums.CurrentPath) > 0 {
 		engo.Mailbox.Dispatch(events.MovementEvent{ums.CurrentUnit, events.MOVEMENT_EVENT_ACTION_STEP})
-		return
+	} else {
+		ums.StopMovement()
 	}
+}
 
-	// end the movement
-	oldUnit := ums.CurrentUnit
-	ums.SetIdle()
-	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	engo.Mailbox.Dispatch(events.MovementEvent{oldUnit, events.MOVEMENT_EVENT_ACTION_FINISHED})
+func (ums *UnitMovementSystem) ResetToLastPosition() {
+	fmt.Println("Resetting position from", ums.CurrentUnit.Position, "to", ums.LastPosition)
+	ums.CurrentUnit.Position = ums.LastPosition
 }
 
 func (ums *UnitMovementSystem) IsIdle() bool {
-	return ums.CurrentTarget == nil && ums.CurrentUnit == nil && ums.CurrentPath == nil
+	return ums.CurrentTarget == nil && ums.CurrentUnit == nil && ums.CurrentPath == nil && ums.LastPosition == engo.Point{}
 }
 
-func (ums *UnitMovementSystem) SetIdle() {
+func (ums *UnitMovementSystem) StopMovement() {
+	if ums.IsIdle() {
+		panic("Attempting to stop movemement, but there is no moving unit!")
+	}
+	oldUnit := ums.CurrentUnit
 	ums.CurrentUnit = nil
 	ums.CurrentTarget = nil
 	ums.CurrentPath = nil
+	ums.LastPosition = engo.Point{}
+	oldUnit.AnimationComponent.SelectAnimationByName("idle")
+	engo.Mailbox.Dispatch(events.MovementEvent{oldUnit, events.MOVEMENT_EVENT_ACTION_FINISHED})
 }
 
 func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {
 	dist := a.PointDistance(*b)
 
 	var points []engo.Point
-
+	// the first point of the interpolation is always the origin point
 	for i := float32(0.0); i < dist; i += stepSize {
 		p := engo.Point{
 			X: a.X + (i/dist)*(b.X-a.X),
