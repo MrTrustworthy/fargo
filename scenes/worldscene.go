@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/systems"
 )
@@ -38,5 +39,7 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.CollisionSystem{})
 
 	engo.Input.RegisterButton(events.INPUT_EVENT_ACTION_CREATEUNIT, engo.KeyC)
+
+	events.InitEventLogging(fmt.Println)
 
 }

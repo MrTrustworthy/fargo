@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	MOVEMENT_EVENT_NAME            = "InteractionEvent"
+	MOVEMENT_EVENT_NAME            = "MovementEvent"
 	MOVEMENT_EVENT_ACTION_FINISHED = "MoveCompleted"
 	MOVEMENT_EVENT_ACTION_STEP     = "MoveStep"
 )
@@ -15,4 +15,9 @@ type MovementEvent struct {
 	Action string
 }
 
-func (ae MovementEvent) Type() string { return MOVEMENT_EVENT_NAME }
+func (me MovementEvent) Type() string { return MOVEMENT_EVENT_NAME }
+
+func (me MovementEvent) AsLogMessage() string {
+	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)
+	return "Action[" + me.Action + "] for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
+}

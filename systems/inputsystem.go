@@ -33,6 +33,9 @@ func (is *InputSystem) Update(dt float32) {
 
 	} else if engo.Input.Button(events.INPUT_EVENT_ACTION_CREATEUNIT).JustPressed() {
 		event.Action = events.INPUT_EVENT_ACTION_CREATEUNIT
+	} else {
+		// don't send out events if nothing has happened
+		return
 	}
 	engo.Mailbox.Dispatch(event)
 

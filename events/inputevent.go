@@ -2,6 +2,7 @@ package events
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"engo.io/engo/common"
 )
 
@@ -22,3 +23,8 @@ type InputEvent struct {
 }
 
 func (ie InputEvent) Type() string { return INPUT_EVENT_NAME }
+
+func (ie InputEvent) AsLogMessage() string {
+	x, y := PointToXYStrings(engo.Point{ie.MouseX, ie.MouseY})
+	return "Action[" + ie.Action + "] on mouse position (" + x + ":" + y + ")"
+}

@@ -14,3 +14,7 @@ type SelectionEvent struct {
 }
 
 func (se SelectionEvent) Type() string { return SELECT_EVENT_NAME }
+
+func (se SelectionEvent) AsLogMessage() string {
+	return "Action[" + se.Action + "] for unit " + se.Unit.Name
+}
