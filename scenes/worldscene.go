@@ -37,6 +37,7 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.UnitMovementSystem{})
 	world.AddSystem(&systems.UnitInteractionSystem{})
 	world.AddSystem(&systems.UnitCollisionSystem{})
+	world.AddSystem(&systems.UnitAbilitySystem{})
 
 	engo.Input.RegisterButton(events.INPUT_EVENT_ACTION_CREATEUNIT, engo.KeyC)
 

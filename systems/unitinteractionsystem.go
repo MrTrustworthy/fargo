@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -23,14 +22,25 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 			return
 		}
 
-		if unit, err := FindUnitUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
-			if unit == GetCurrentlySelectedUnit(uis.World) {
+		if clickedUnit, err := FindUnitUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
+			selectedUnit := GetCurrentlySelectedUnit(uis.World)
+			if clickedUnit == selectedUnit {
 				return
 			} else {
+
+				// ability use is requested
+
+				// TODO handle cases where a current movement is ongoing and no new movement is started,
+				// TODO but the ability use is still queued
 				events.ListenOnce(events.MOVEMENT_EVENT_NAME, events.MOVEMENT_EVENT_ACTION_FINISHED, func(msg engo.Message) {
-					fmt.Println("DONE WITH THAT")
+					engo.Mailbox.Dispatch(events.RequestAbilityUseEvent{
+						Action:  events.REQUESTABILITYUSE_EVENT_ACTION_REQUEST_ABILITY,
+						Source:  selectedUnit,
+						Target:  clickedUnit,
+						Ability: &selectedUnit.StandardAbility,
+					})
 				})
-				dispatchMoveTo(unit.Center().X, unit.Center().Y, 250)
+				dispatchMoveTo(clickedUnit.Center().X, clickedUnit.Center().Y, selectedUnit.StandardAbility.Maxrange())
 
 			}
 		} else {

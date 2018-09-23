@@ -18,6 +18,7 @@ type Unit struct {
 	common.SpaceComponent
 	common.RenderComponent
 	common.AnimationComponent
+	StandardAbility Ability
 }
 
 const UNITSIZE = 64
@@ -48,7 +49,7 @@ func NewUnit(point *engo.Point) *Unit {
 	animationComponent.AddDefaultAnimation(idleAnimation)
 	animationComponent.SelectAnimationByName("spawn")
 
-	return &Unit{
+	unit := &Unit{
 		BasicEntity: ecs.NewBasic(),
 		SpaceComponent: common.SpaceComponent{
 			Position: *point,
@@ -65,4 +66,7 @@ func NewUnit(point *engo.Point) *Unit {
 			Speed: 5.0,
 		},
 	}
+
+	unit.StandardAbility = NewStabAbility(unit)
+	return unit
 }
