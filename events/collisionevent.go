@@ -15,7 +15,8 @@ type CollisionEvent struct {
 	Action      string
 }
 
-func (ce CollisionEvent) Type() string { return COLLISON_EVENT_NAME }
+func (ce CollisionEvent) Type() string      { return COLLISON_EVENT_NAME }
+func (ce CollisionEvent) GetAction() string { return ce.Action }
 
 func (ce CollisionEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(ce.ActiveUnit.Position)

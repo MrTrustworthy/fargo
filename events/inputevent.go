@@ -22,7 +22,8 @@ type InputEvent struct {
 	Action string
 }
 
-func (ie InputEvent) Type() string { return INPUT_EVENT_NAME }
+func (ie InputEvent) Type() string      { return INPUT_EVENT_NAME }
+func (ie InputEvent) GetAction() string { return ie.Action }
 
 func (ie InputEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(engo.Point{ie.MouseX, ie.MouseY})

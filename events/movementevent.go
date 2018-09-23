@@ -15,7 +15,8 @@ type MovementEvent struct {
 	Action string
 }
 
-func (me MovementEvent) Type() string { return MOVEMENT_EVENT_NAME }
+func (me MovementEvent) Type() string      { return MOVEMENT_EVENT_NAME }
+func (me MovementEvent) GetAction() string { return me.Action }
 
 func (me MovementEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)

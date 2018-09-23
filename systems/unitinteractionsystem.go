@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -26,7 +27,9 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 			if unit == GetCurrentlySelectedUnit(uis.World) {
 				return
 			} else {
-
+				events.ListenOnce(events.MOVEMENT_EVENT_NAME, events.MOVEMENT_EVENT_ACTION_FINISHED, func(msg engo.Message) {
+					fmt.Println("DONE WITH THAT")
+				})
 				dispatchMoveTo(unit.Center().X, unit.Center().Y, 250)
 
 			}

@@ -15,7 +15,8 @@ type InteractionEvent struct {
 	StopAtDistance float32
 }
 
-func (ae InteractionEvent) Type() string { return INTERACTION_EVENT_NAME }
+func (ae InteractionEvent) Type() string      { return INTERACTION_EVENT_NAME }
+func (ae InteractionEvent) GetAction() string { return ae.Action }
 
 func (ae InteractionEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(ae.Target)

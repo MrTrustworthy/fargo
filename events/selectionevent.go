@@ -13,7 +13,8 @@ type SelectionEvent struct {
 	*entities.Unit
 }
 
-func (se SelectionEvent) Type() string { return SELECT_EVENT_NAME }
+func (se SelectionEvent) Type() string      { return SELECT_EVENT_NAME }
+func (se SelectionEvent) GetAction() string { return se.Action }
 
 func (se SelectionEvent) AsLogMessage() string {
 	return "Action[" + se.Action + "] for unit " + se.Unit.Name
