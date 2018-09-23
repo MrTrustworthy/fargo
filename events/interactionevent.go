@@ -5,13 +5,14 @@ import (
 )
 
 const (
-	INTERACTION_EVENT_NAME        = "InteractionEvent"
-	INTERACTION_EVENT_ACTION_MOVE = "RequestMove"
+	INTERACTION_EVENT_NAME           = "InteractionEvent"
+	INTERACTION_EVENT_ACTION_MOVE_TO = "RequestMoveTo"
 )
 
 type InteractionEvent struct {
-	Target engo.Point
-	Action string
+	Target         engo.Point
+	Action         string
+	StopAtDistance float32
 }
 
 func (ae InteractionEvent) Type() string { return INTERACTION_EVENT_NAME }

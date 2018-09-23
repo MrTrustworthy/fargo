@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -25,21 +24,24 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 
 		if unit, err := FindUnitUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
 			if unit == GetCurrentlySelectedUnit(uis.World) {
-				fmt.Println("TODO: Handle action on selected unit itself")
+				return
 			} else {
-				fmt.Println("TODO: Handle action on other unit")
+
+				dispatchMoveTo(unit.Center().X, unit.Center().Y, 250)
+
 			}
 		} else {
-			dispatchMoveTo(imsg.MouseX, imsg.MouseY)
+			dispatchMoveTo(imsg.MouseX, imsg.MouseY, 0)
 		}
 
 	}
 }
 
-func dispatchMoveTo(x, y float32) {
+func dispatchMoveTo(x, y, dist float32) {
 	engo.Mailbox.Dispatch(events.InteractionEvent{
-		Target: engo.Point{X: x, Y: y},
-		Action: events.INTERACTION_EVENT_ACTION_MOVE,
+		Target:         engo.Point{X: x, Y: y},
+		Action:         events.INTERACTION_EVENT_ACTION_MOVE_TO,
+		StopAtDistance: dist,
 	})
 }
 

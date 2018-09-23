@@ -18,15 +18,15 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
-	engo.Mailbox.Listen(events.INTERACTION_EVENT_NAME, ums.getHandleActionEvent())
+	engo.Mailbox.Listen(events.INTERACTION_EVENT_NAME, ums.getHandleInteractionEvent())
 	engo.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
 
 }
 
-func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
+func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		amsg, ok := msg.(events.InteractionEvent)
-		if !ok || amsg.Action != events.INTERACTION_EVENT_ACTION_MOVE {
+		if !ok || amsg.Action != events.INTERACTION_EVENT_ACTION_MOVE_TO {
 			return
 		}
 		if !ums.IsIdle() {
@@ -34,9 +34,12 @@ func (ums *UnitMovementSystem) getHandleActionEvent() func(msg engo.Message) {
 			return
 		}
 
-		if unit := GetCurrentlySelectedUnit(ums.world); unit != nil {
-			ums.InitiateMovement(unit, &amsg.Target)
+		unit := GetCurrentlySelectedUnit(ums.world)
+		if unit == nil {
+			panic("This shouldn't happen: No unit is selected, can't perform a movement!")
 		}
+
+		ums.InitiateMovement(unit, &amsg.Target, amsg.StopAtDistance)
 	}
 }
 
@@ -54,19 +57,19 @@ func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg engo.Message) 
 	}
 }
 
-func (ums *UnitMovementSystem) InitiateMovement(unit *entities.Unit, point *engo.Point) {
+func (ums *UnitMovementSystem) InitiateMovement(unit *entities.Unit, point *engo.Point, stopDistance float32) {
 	ums.CurrentUnit = unit
 	ums.CurrentTarget = &engo.Point{
 		X: point.X + entities.UNIT_CENTER_OFFSET.X,
 		Y: point.Y + entities.UNIT_CENTER_OFFSET.Y,
 	}
-	ums.CurrentPath = InterpolateBetween(
+	plannedPath := InterpolateBetween(
 		&ums.CurrentUnit.GetSpaceComponent().Position,
 		ums.CurrentTarget,
 		ums.CurrentUnit.Speed,
 	)
+	ums.CurrentPath = ShortenPathToStopDistance(plannedPath, ums.CurrentTarget, stopDistance)
 	ums.CurrentUnit.AnimationComponent.SelectAnimationByName("walk")
-
 }
 
 func (ums *UnitMovementSystem) Update(dt float32) {
@@ -112,8 +115,10 @@ func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {
 	dist := a.PointDistance(*b)
 
 	var points []engo.Point
-	// the first point of the interpolation is always the origin point
-	for i := float32(0.0); i < dist; i += stepSize {
+	// we always start the movement at the origin position itself so that when moving and encountering an issue,
+	// we'll always have a valid position (the origin) to go back to
+	points = append(points, *a)
+	for i := stepSize; i < dist; i += stepSize {
 		p := engo.Point{
 			X: a.X + (i/dist)*(b.X-a.X),
 			Y: a.Y + (i/dist)*(b.Y-a.Y),
@@ -121,6 +126,21 @@ func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {
 		points = append(points, p)
 	}
 	points = append(points, *b)
+	return points
+}
+
+// Can be used to shorten a given path so that the last point is at least stopDistance from the target
+func ShortenPathToStopDistance(plannedPath []engo.Point, target *engo.Point, stopDistance float32) []engo.Point {
+	maxOvershoot := float32(0.01) // in order to balance out floating point comparison
+	var points []engo.Point
+	for _, pathPoint := range plannedPath {
+		pointDistance := pathPoint.PointDistance(*target)
+		if pointDistance+maxOvershoot < stopDistance {
+			fmt.Println("Filtered out at least one point in path due to stop distance!")
+			break
+		}
+		points = append(points, pathPoint)
+	}
 
 	return points
 }
