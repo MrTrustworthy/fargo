@@ -3,19 +3,28 @@ package events
 import "github.com/MrTrustworthy/fargo/entities"
 
 const (
-	SELECT_EVENT_NAME            = "SelectionEvent"
-	SELECT_EVENT_ACTION_SELECTED = "Selected"
-	SELECT_EVENT_ACTION_DESELECT = "Deselected"
+	SELECTION_SELECTED_EVENT_NAME   = "SelectionSelectedEvent"
+	SELECTION_DESELECTED_EVENT_NAME = "SelectionDeselectedEvent"
 )
 
-type SelectionEvent struct {
+type SelectionSelectedEvent struct {
 	Action string
 	*entities.Unit
 }
 
-func (se SelectionEvent) Type() string      { return SELECT_EVENT_NAME }
-func (se SelectionEvent) GetAction() string { return se.Action }
+func (se SelectionSelectedEvent) Type() string { return SELECTION_SELECTED_EVENT_NAME }
 
-func (se SelectionEvent) AsLogMessage() string {
-	return "Action[" + se.Action + "] for unit " + se.Unit.Name
+func (se SelectionSelectedEvent) AsLogMessage() string {
+	return "for unit " + se.Unit.Name
+}
+
+type SelectionDeselectedEvent struct {
+	Action string
+	*entities.Unit
+}
+
+func (se SelectionDeselectedEvent) Type() string { return SELECTION_DESELECTED_EVENT_NAME }
+
+func (se SelectionDeselectedEvent) AsLogMessage() string {
+	return "for unit " + se.Unit.Name
 }

@@ -12,14 +12,14 @@ type UnitAbilitySystem struct {
 
 func (uas *UnitAbilitySystem) New(world *ecs.World) {
 	uas.world = world
-	engo.Mailbox.Listen(events.REQUESTABILITYUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
+	engo.Mailbox.Listen(events.ABILITY_REQUESTUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
 
 }
 
 func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		ramsg, ok := msg.(events.RequestAbilityUseEvent)
-		if !ok || ramsg.Action != events.REQUESTABILITYUSE_EVENT_ACTION_REQUEST_ABILITY {
+		if !ok {
 			return
 		}
 		// TODO check if actually in range

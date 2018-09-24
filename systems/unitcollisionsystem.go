@@ -13,13 +13,13 @@ type UnitCollisionSystem struct {
 
 func (ucs *UnitCollisionSystem) New(world *ecs.World) {
 	ucs.world = world
-	engo.Mailbox.Listen(events.MOVEMENT_EVENT_NAME, ucs.getHandleMoveStepEvent())
+	engo.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
 }
 
 func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		mmsg, ok := msg.(events.MovementEvent)
-		if !ok || mmsg.Action != events.MOVEMENT_EVENT_ACTION_STEP {
+		mmsg, ok := msg.(events.MovementStepEvent)
+		if !ok {
 			return
 		}
 
@@ -38,7 +38,6 @@ func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg engo.Message) 
 			engo.Mailbox.Dispatch(events.CollisionEvent{
 				ActiveUnit:  mmsg.Unit,
 				PassiveUnit: other,
-				Action:      events.COLLISON_EVENT_ACTION_COLLIDED,
 			})
 			return
 		}

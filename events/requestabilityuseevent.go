@@ -5,20 +5,17 @@ import (
 )
 
 const (
-	REQUESTABILITYUSE_EVENT_NAME                   = "RequestAbilityUseEvent"
-	REQUESTABILITYUSE_EVENT_ACTION_REQUEST_ABILITY = "RequestAbilityUseAction"
+	ABILITY_REQUESTUSE_EVENT_NAME = "RequestAbilityUseEvent"
 )
 
 type RequestAbilityUseEvent struct {
-	Action  string
 	Source  *entities.Unit
 	Target  *entities.Unit
 	Ability *entities.Ability
 }
 
-func (raue RequestAbilityUseEvent) Type() string      { return REQUESTABILITYUSE_EVENT_NAME }
-func (raue RequestAbilityUseEvent) GetAction() string { return raue.Action }
+func (raue RequestAbilityUseEvent) Type() string { return ABILITY_REQUESTUSE_EVENT_NAME }
 
 func (raue RequestAbilityUseEvent) AsLogMessage() string {
-	return "Action[" + raue.Action + "] between " + raue.Source.Name + " and " + raue.Target.Name
+	return "between " + raue.Source.Name + " and " + raue.Target.Name
 }

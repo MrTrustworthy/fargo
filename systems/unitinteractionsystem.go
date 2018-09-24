@@ -12,13 +12,13 @@ type UnitInteractionSystem struct {
 
 func (uis *UnitInteractionSystem) New(world *ecs.World) {
 	uis.World = world
-	engo.Mailbox.Listen(events.INPUT_EVENT_NAME, uis.getHandleInputEvent())
+	engo.Mailbox.Listen(events.INPUT_INTERACT_EVENT_NAME, uis.getHandleInputEvent())
 }
 
 func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(events.InputEvent)
-		if !ok || imsg.Action != events.INPUT_EVENT_ACTION_INTERACT {
+		imsg, ok := msg.(events.InputInteractEvent)
+		if !ok {
 			return
 		}
 
@@ -32,9 +32,8 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 
 				// TODO handle cases where a current movement is ongoing and no new movement is started,
 				// TODO but the ability use is still queued
-				events.ListenOnce(events.MOVEMENT_EVENT_NAME, events.MOVEMENT_EVENT_ACTION_FINISHED, func(msg engo.Message) {
+				events.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 					engo.Mailbox.Dispatch(events.RequestAbilityUseEvent{
-						Action:  events.REQUESTABILITYUSE_EVENT_ACTION_REQUEST_ABILITY,
 						Source:  selectedUnit,
 						Target:  clickedUnit,
 						Ability: &selectedUnit.StandardAbility,
@@ -51,9 +50,8 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
 }
 
 func dispatchMoveTo(x, y, dist float32) {
-	engo.Mailbox.Dispatch(events.InteractionEvent{
+	engo.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         engo.Point{X: x, Y: y},
-		Action:         events.INTERACTION_EVENT_ACTION_MOVE_TO,
 		StopAtDistance: dist,
 	})
 }

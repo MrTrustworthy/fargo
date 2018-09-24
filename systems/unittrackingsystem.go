@@ -19,42 +19,49 @@ func (ss *UnitTrackingSystem) Add(unit *entities.Unit) {
 
 func (ss *UnitTrackingSystem) New(world *ecs.World) {
 
-	engo.Mailbox.Listen(events.INPUT_EVENT_NAME, ss.getHandleInputEvent())
-	engo.Mailbox.Listen(events.SELECT_EVENT_NAME, ss.getHandleSelectEvent())
+	engo.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
+	engo.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
+	engo.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
 
 }
 
 func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(events.InputEvent)
-		if !ok || imsg.Action != events.INPUT_EVENT_ACTION_SELECT {
+		imsg, ok := msg.(events.InputSelectEvent)
+		if !ok {
 			return
 		}
 
 		if ss.SelectedUnit != nil {
 			deselectedUnit := ss.SelectedUnit
 			ss.SelectedUnit = nil
-			engo.Mailbox.Dispatch(events.SelectionEvent{Action: events.SELECT_EVENT_ACTION_DESELECT, Unit: deselectedUnit})
+			engo.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
 		}
 
 		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
 			ss.SelectedUnit = unit
-			engo.Mailbox.Dispatch(events.SelectionEvent{Action: events.SELECT_EVENT_ACTION_SELECTED, Unit: unit})
+			engo.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
 		}
 	}
 }
 
 func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		smsg, ok := msg.(events.SelectionEvent)
+		smsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
 		}
-		if smsg.Action == events.SELECT_EVENT_ACTION_SELECTED {
-			smsg.Unit.AnimationComponent.SelectAnimationByName("jump")
-		} else if smsg.Action == events.SELECT_EVENT_ACTION_DESELECT {
-			smsg.Unit.AnimationComponent.SelectAnimationByName("duck")
+		smsg.Unit.AnimationComponent.SelectAnimationByName("jump")
+	}
+}
+
+func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
+		smsg, ok := msg.(events.SelectionDeselectedEvent)
+		if !ok {
+			return
 		}
+		smsg.Unit.AnimationComponent.SelectAnimationByName("duck")
 	}
 }
 

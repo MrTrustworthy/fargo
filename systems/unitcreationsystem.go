@@ -14,15 +14,15 @@ type UnitCreationSystem struct {
 
 func (ucs *UnitCreationSystem) New(world *ecs.World) {
 	ucs.World = world
-	engo.Mailbox.Listen(events.INPUT_EVENT_NAME, ucs.getHandleInputEvent())
+	engo.Mailbox.Listen(events.INPUT_CREATEUNIT_EVENT_NAME, ucs.getHandleInputEvent())
 }
 
 func (ucs *UnitCreationSystem) Update(dt float32) {}
 
 func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		imsg, ok := msg.(events.InputEvent)
-		if !ok || imsg.Action != "CreateUnit" {
+		imsg, ok := msg.(events.InputCreateunitEvent)
+		if !ok {
 			return
 		}
 		ucs.createRandomUnit(imsg.MouseTracker)

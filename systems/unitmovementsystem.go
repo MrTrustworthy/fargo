@@ -18,15 +18,15 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
-	engo.Mailbox.Listen(events.INTERACTION_EVENT_NAME, ums.getHandleInteractionEvent())
+	engo.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
 	engo.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
 
 }
 
 func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
-		amsg, ok := msg.(events.InteractionEvent)
-		if !ok || amsg.Action != events.INTERACTION_EVENT_ACTION_MOVE_TO {
+		amsg, ok := msg.(events.MovementRequestEvent)
+		if !ok {
 			return
 		}
 		if !ums.IsIdle() {
@@ -46,7 +46,7 @@ func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message
 func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		cmsg, ok := msg.(events.CollisionEvent)
-		if !ok || cmsg.Action != events.COLLISON_EVENT_ACTION_COLLIDED {
+		if !ok {
 			return
 		}
 		if ums.IsIdle() {
@@ -83,7 +83,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 
 	// stop here if movement is not yet finished
 	if len(ums.CurrentPath) > 0 {
-		engo.Mailbox.Dispatch(events.MovementEvent{ums.CurrentUnit, events.MOVEMENT_EVENT_ACTION_STEP})
+		engo.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
 	} else {
 		ums.StopMovement()
 	}
@@ -108,7 +108,7 @@ func (ums *UnitMovementSystem) StopMovement() {
 	ums.CurrentPath = nil
 	ums.LastPosition = engo.Point{}
 	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	engo.Mailbox.Dispatch(events.MovementEvent{oldUnit, events.MOVEMENT_EVENT_ACTION_FINISHED})
+	engo.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit})
 }
 
 func InterpolateBetween(a, b *engo.Point, stepSize float32) []engo.Point {

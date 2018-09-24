@@ -7,25 +7,44 @@ import (
 )
 
 const (
-	INPUT_EVENT_NAME              = "InputEvent"
-	INPUT_EVENT_ACTION_SELECT     = "Select"
-	INPUT_EVENT_ACTION_INTERACT   = "Interact"
-	INPUT_EVENT_ACTION_CREATEUNIT = "CreateUnit"
+	INPUT_SELECT_EVENT_NAME     = "InputSelectEvent"
+	INPUT_INTERACT_EVENT_NAME   = "InputInteractEvent"
+	INPUT_CREATEUNIT_EVENT_NAME = "InputCreateunitEvent"
 )
 
 type MouseTracker struct {
 	ecs.BasicEntity
 	common.MouseComponent
 }
-type InputEvent struct {
+
+type InputSelectEvent struct {
 	MouseTracker
-	Action string
 }
 
-func (ie InputEvent) Type() string      { return INPUT_EVENT_NAME }
-func (ie InputEvent) GetAction() string { return ie.Action }
+func (ie InputSelectEvent) Type() string { return INPUT_SELECT_EVENT_NAME }
+func (ie InputSelectEvent) AsLogMessage() string {
+	return getInputEventLogMessage(ie.MouseTracker)
+}
 
-func (ie InputEvent) AsLogMessage() string {
-	x, y := PointToXYStrings(engo.Point{ie.MouseX, ie.MouseY})
-	return "Action[" + ie.Action + "] on mouse position (" + x + ":" + y + ")"
+type InputInteractEvent struct {
+	MouseTracker
+}
+
+func (ie InputInteractEvent) Type() string { return INPUT_INTERACT_EVENT_NAME }
+func (ie InputInteractEvent) AsLogMessage() string {
+	return getInputEventLogMessage(ie.MouseTracker)
+}
+
+type InputCreateunitEvent struct {
+	MouseTracker
+}
+
+func (ie InputCreateunitEvent) Type() string { return INPUT_CREATEUNIT_EVENT_NAME }
+func (ie InputCreateunitEvent) AsLogMessage() string {
+	return getInputEventLogMessage(ie.MouseTracker)
+}
+
+func getInputEventLogMessage(tracker MouseTracker) string {
+	x, y := PointToXYStrings(engo.Point{tracker.MouseX, tracker.MouseY})
+	return " on mouse position (" + x + ":" + y + ")"
 }

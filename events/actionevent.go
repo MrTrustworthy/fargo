@@ -8,7 +8,6 @@ import (
 type ActionEvent interface {
 	Type() string
 	AsLogMessage() string
-	GetAction() string
 }
 
 func PointToXYStrings(p engo.Point) (x, y string) {
@@ -19,13 +18,13 @@ func PointToXYStrings(p engo.Point) (x, y string) {
 
 // this allows for listening to a specific event type only once
 // TODO there is absolutely no cleanup, this is horrible
-func ListenOnce(messageType, actionType string, handler engo.MessageHandler) {
+func ListenOnce(messageType string, handler engo.MessageHandler) {
 	alreadyFired := false
 	engo.Mailbox.Listen(messageType, func(msg engo.Message) {
 		if alreadyFired {
 			return
 		}
-		if amsg, ok := msg.(ActionEvent); !ok || amsg.GetAction() != actionType {
+		if _, ok := msg.(ActionEvent); !ok {
 			return
 		}
 

@@ -1,24 +1,47 @@
 package events
 
 import (
+	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
 const (
-	MOVEMENT_EVENT_NAME            = "MovementEvent"
-	MOVEMENT_EVENT_ACTION_FINISHED = "MoveCompleted"
-	MOVEMENT_EVENT_ACTION_STEP     = "MoveStep"
+	MOVEMENT_REQUESTMOVE_EVENT_NAME = "MovementRequestEvent"
+	MOVEMENT_COMPLETED_EVENT_NAME   = "MovementCompletedEvent"
+	MOVEMENT_STEP_EVENT_NAME        = "MovementStepEvent"
 )
 
-type MovementEvent struct {
+type MovementCompletedEvent struct {
 	*entities.Unit
-	Action string
 }
 
-func (me MovementEvent) Type() string      { return MOVEMENT_EVENT_NAME }
-func (me MovementEvent) GetAction() string { return me.Action }
+func (me MovementCompletedEvent) Type() string { return MOVEMENT_COMPLETED_EVENT_NAME }
 
-func (me MovementEvent) AsLogMessage() string {
+func (me MovementCompletedEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)
-	return "Action[" + me.Action + "] for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
+	return "for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
+}
+
+type MovementStepEvent struct {
+	*entities.Unit
+}
+
+func (me MovementStepEvent) Type() string { return MOVEMENT_STEP_EVENT_NAME }
+
+func (me MovementStepEvent) AsLogMessage() string {
+	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)
+	return "for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
+}
+
+type MovementRequestEvent struct {
+	Target         engo.Point
+	Action         string
+	StopAtDistance float32
+}
+
+func (rmte MovementRequestEvent) Type() string { return MOVEMENT_REQUESTMOVE_EVENT_NAME }
+
+func (rmte MovementRequestEvent) AsLogMessage() string {
+	x, y := PointToXYStrings(rmte.Target)
+	return "on mouse position (" + x + ":" + y
 }
