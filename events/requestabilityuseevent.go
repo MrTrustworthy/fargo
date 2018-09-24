@@ -9,13 +9,11 @@ const (
 )
 
 type RequestAbilityUseEvent struct {
-	Source  *entities.Unit
-	Target  *entities.Unit
 	Ability *entities.Ability
 }
 
 func (raue RequestAbilityUseEvent) Type() string { return ABILITY_REQUESTUSE_EVENT_NAME }
 
 func (raue RequestAbilityUseEvent) AsLogMessage() string {
-	return "between " + raue.Source.Name + " and " + raue.Target.Name
+	return (*raue.Ability).Name() + "between " + (*raue.Ability).Source().Name + " and " + (*raue.Ability).Target().Name
 }

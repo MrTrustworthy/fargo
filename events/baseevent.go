@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type ActionEvent interface {
+type BaseEvent interface {
 	Type() string
 	AsLogMessage() string
 }
@@ -24,7 +24,7 @@ func ListenOnce(messageType string, handler engo.MessageHandler) {
 		if alreadyFired {
 			return
 		}
-		if _, ok := msg.(ActionEvent); !ok {
+		if _, ok := msg.(BaseEvent); !ok {
 			return
 		}
 

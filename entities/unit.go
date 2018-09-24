@@ -18,7 +18,7 @@ type Unit struct {
 	common.SpaceComponent
 	common.RenderComponent
 	common.AnimationComponent
-	StandardAbility Ability
+	SelectedAbility Ability
 }
 
 const UNITSIZE = 64
@@ -67,6 +67,6 @@ func NewUnit(point *engo.Point) *Unit {
 		},
 	}
 
-	unit.StandardAbility = NewStabAbility(unit)
+	unit.SelectedAbility = NewStabAbility(unit)
 	return unit
 }

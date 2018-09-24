@@ -2,6 +2,8 @@ package entities
 
 type Ability interface {
 	Source() *Unit
+	Target() *Unit
+	SetTarget(*Unit)
 	Maxrange() float32
 	Name() string
 	AnimationName() string
@@ -10,6 +12,7 @@ type Ability interface {
 
 type StabAbility struct {
 	source   *Unit
+	target   *Unit
 	maxrange float32
 }
 
@@ -22,6 +25,13 @@ func NewStabAbility(unit *Unit) *StabAbility {
 
 func (sa *StabAbility) Source() *Unit {
 	return sa.source
+}
+
+func (sa *StabAbility) Target() *Unit {
+	return sa.target
+}
+func (sa *StabAbility) SetTarget(unit *Unit) {
+	sa.target = unit
 }
 
 func (sa *StabAbility) Maxrange() float32 {
@@ -37,5 +47,5 @@ func (sa *StabAbility) AnimationName() string {
 }
 
 func (sa *StabAbility) Execute() {
-
+	sa.source.AnimationComponent.SelectAnimationByName("stab")
 }
