@@ -11,6 +11,7 @@ type UnitAttributes struct {
 	Name   string
 	Speed  float32
 	Health int
+	AP     int
 }
 
 type Unit struct {
@@ -66,6 +67,7 @@ func NewUnit(point *engo.Point) *Unit {
 			Name:   namepicker.RandomName(),
 			Speed:  5.0,
 			Health: 10,
+			AP:     7,
 		},
 	}
 

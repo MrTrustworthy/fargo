@@ -6,46 +6,67 @@ type Ability interface {
 	SetTarget(*Unit)
 	Maxrange() float32
 	Name() string
+	Damage() int
+	Cost() int
 	AnimationName() string
-	Execute()
+	CanExecute() bool
 }
 
-type StabAbility struct {
-	source   *Unit
-	target   *Unit
-	maxrange float32
+type SimpleTargetAbility struct {
+	source    *Unit
+	target    *Unit
+	cost      int
+	name      string
+	animation string
+	maxrange  float32
+	damage    int
 }
 
-func NewStabAbility(unit *Unit) *StabAbility {
-	return &StabAbility{
-		source:   unit,
-		maxrange: 140,
+func NewStabAbility(unit *Unit) *SimpleTargetAbility {
+	return &SimpleTargetAbility{
+		source:    unit,
+		maxrange:  140,
+		name:      "SimpleTargetAbility",
+		animation: "stab",
+		damage:    4,
+		cost:      2,
 	}
 }
 
-func (sa *StabAbility) Source() *Unit {
+func (sa *SimpleTargetAbility) Source() *Unit {
 	return sa.source
 }
 
-func (sa *StabAbility) Target() *Unit {
+func (sa *SimpleTargetAbility) Target() *Unit {
 	return sa.target
 }
-func (sa *StabAbility) SetTarget(unit *Unit) {
+func (sa *SimpleTargetAbility) SetTarget(unit *Unit) {
 	sa.target = unit
 }
 
-func (sa *StabAbility) Maxrange() float32 {
+func (sa *SimpleTargetAbility) Maxrange() float32 {
 	return sa.maxrange
 }
 
-func (sa *StabAbility) Name() string {
-	return "StabAbility"
+func (sa *SimpleTargetAbility) Name() string {
+	return sa.name
 }
 
-func (sa *StabAbility) AnimationName() string {
-	return "stab"
+func (sa *SimpleTargetAbility) Cost() int {
+	return sa.cost
 }
 
-func (sa *StabAbility) Execute() {
-	sa.source.AnimationComponent.SelectAnimationByName("stab")
+func (sa *SimpleTargetAbility) Damage() int {
+	return sa.damage
+}
+
+func (sa *SimpleTargetAbility) AnimationName() string {
+	return sa.animation
+}
+
+func (sa *SimpleTargetAbility) CanExecute() bool {
+	origin, target := sa.Source().Center(), sa.Target().Center()
+	isInRange := origin.PointDistance(target) <= sa.Maxrange()
+	hasEnoughAP := sa.Source().AP >= sa.cost
+	return isInRange && hasEnoughAP
 }

@@ -35,12 +35,34 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg engo.Messa
 		currentDistance := sourcePosition.PointDistance(target.GetSpaceComponent().Center())
 
 		if currentDistance <= source.SelectedAbility.Maxrange() {
-			(*ramsg.Ability).Execute()
+			executeAbility(*ramsg.Ability)
 		} else {
 			fmt.Println("Can't attack, distance too great:", currentDistance, "trying again")
 			moveCloserAndRetry(source, target)
 		}
 	}
+}
+
+func executeAbility(ability entities.Ability) {
+	if !ability.CanExecute() {
+		engo.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
+		return
+	}
+
+	ability.Source().AP -= ability.Cost()
+	ability.Source().AnimationComponent.SelectAnimationByName(ability.AnimationName())
+
+	engo.Mailbox.Dispatch(events.RequestUnitDamageEvent{
+		Unit:   ability.Target(),
+		Damage: ability.Damage(),
+	})
+
+	if ability.Target().Health <= 0 {
+		engo.Mailbox.Dispatch(events.UnitDeathEvent{
+			Unit: ability.Target(),
+		})
+	}
+	engo.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
 }
 
 func moveCloserAndRetry(originUnit, targetUnit *entities.Unit) {

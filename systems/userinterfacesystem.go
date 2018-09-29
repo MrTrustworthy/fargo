@@ -29,7 +29,7 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
 			return
 		}
 		unitText := "Unit: " + imsg.Unit.Name + "\nSelected Attack: " + imsg.Unit.SelectedAbility.Name() + "\nSpeed:" +
-			strconv.Itoa(int(imsg.Unit.Speed)) + " HP: " + strconv.Itoa(imsg.Unit.Health)
+			strconv.Itoa(int(imsg.Unit.Speed)) + " HP: " + strconv.Itoa(imsg.Unit.Health) + " AP: " + strconv.Itoa(imsg.Unit.AP)
 		uis.SelectText.SetText(unitText)
 	}
 }
