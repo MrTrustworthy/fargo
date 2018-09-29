@@ -15,7 +15,7 @@ type HUDText struct {
 }
 
 func NewHUDText() *HUDText {
-	height, width := float32(70), float32(600)
+	height, width := float32(90), float32(700)
 
 	hudText := HUDText{BasicEntity: ecs.NewBasic()}
 	hudText.SpaceComponent = common.SpaceComponent{
@@ -29,7 +29,7 @@ func NewHUDText() *HUDText {
 	fnt := &common.Font{
 		URL:  "fonts/Roboto-Regular.ttf",
 		FG:   color.Black,
-		Size: 32,
+		Size: 22,
 	}
 	err := fnt.CreatePreloaded()
 	if err != nil {
@@ -60,7 +60,7 @@ type HUD struct {
 }
 
 func NewHUD() *HUD {
-	height, width := float32(70), float32(600)
+	height, width := float32(90), float32(700)
 
 	hud := HUD{BasicEntity: ecs.NewBasic()}
 	hud.SpaceComponent = common.SpaceComponent{

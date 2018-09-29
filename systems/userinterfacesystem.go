@@ -5,6 +5,7 @@ import (
 	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"strconv"
 )
 
 type UserInterfaceSystem struct {
@@ -27,7 +28,9 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
 		if !ok {
 			return
 		}
-		uis.SelectText.SetText("Unit:" + imsg.Unit.Name)
+		unitText := "Unit: " + imsg.Unit.Name + "\nSelected Attack: " + imsg.Unit.SelectedAbility.Name() + "\nSpeed:" +
+			strconv.Itoa(int(imsg.Unit.Speed)) + " HP: " + strconv.Itoa(imsg.Unit.Health)
+		uis.SelectText.SetText(unitText)
 	}
 }
 

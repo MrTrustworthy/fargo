@@ -8,8 +8,9 @@ import (
 )
 
 type UnitAttributes struct {
-	Name  string
-	Speed float32
+	Name   string
+	Speed  float32
+	Health int
 }
 
 type Unit struct {
@@ -62,8 +63,9 @@ func NewUnit(point *engo.Point) *Unit {
 		},
 		AnimationComponent: animationComponent,
 		UnitAttributes: UnitAttributes{
-			Name:  namepicker.RandomName(),
-			Speed: 5.0,
+			Name:   namepicker.RandomName(),
+			Speed:  5.0,
+			Health: 10,
 		},
 	}
 
