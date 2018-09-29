@@ -21,6 +21,7 @@ func (ds *DamageSystem) getHandleDamageEvent() func(msg engo.Message) {
 		}
 
 		imsg.Unit.Health -= imsg.Damage
+		engo.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: imsg.Unit})
 		if imsg.Unit.Health <= 0 {
 			engo.Mailbox.Dispatch(events.UnitDeathEvent{
 				Unit: imsg.Unit,

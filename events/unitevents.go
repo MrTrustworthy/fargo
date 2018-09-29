@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	UNIT_REQUEST_DAMAGE_EVENT = "RequestUnitDamageEvent"
-	UNIT_DEATH_EVENT          = "UnitDeathEvent"
+	UNIT_REQUEST_DAMAGE_EVENT   = "RequestUnitDamageEvent"
+	UNIT_DEATH_EVENT            = "UnitDeathEvent"
+	UNIT_ATTRIBUTE_CHANGE_EVENT = "UnitAttributesChangedEvent"
 )
 
 type RequestUnitDamageEvent struct {
@@ -29,4 +30,14 @@ func (de UnitDeathEvent) Type() string { return UNIT_DEATH_EVENT }
 
 func (de UnitDeathEvent) AsLogMessage() string {
 	return "Unit died:" + de.Unit.Name
+}
+
+type UnitAttributesChangedEvent struct {
+	*entities.Unit
+}
+
+func (de UnitAttributesChangedEvent) Type() string { return UNIT_ATTRIBUTE_CHANGE_EVENT }
+
+func (de UnitAttributesChangedEvent) AsLogMessage() string {
+	return "Unit has changed attributes:" + de.Unit.Name
 }

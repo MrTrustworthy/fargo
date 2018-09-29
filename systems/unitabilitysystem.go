@@ -50,6 +50,7 @@ func executeAbility(ability entities.Ability) {
 	}
 
 	ability.Source().AP -= ability.Cost()
+	engo.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
 	ability.Source().AnimationComponent.SelectAnimationByName(ability.AnimationName())
 
 	engo.Mailbox.Dispatch(events.RequestUnitDamageEvent{

@@ -6,6 +6,7 @@ import (
 	"engo.io/engo/common"
 	"image"
 	"image/color"
+	"strconv"
 )
 
 type HUDText struct {
@@ -43,8 +44,14 @@ func NewHUDText() *HUDText {
 		},
 	}
 	hudText.RenderComponent.SetShader(common.HUDShader)
-	hudText.RenderComponent.SetZIndex(100)
+	hudText.RenderComponent.SetZIndex(101)
 	return &hudText
+}
+
+func (ht *HUDText) SetTextForUnit(unit *Unit) {
+	unitText := "Unit: " + unit.Name + "\nSelected Attack: " + unit.SelectedAbility.Name() + "\nSpeed:" +
+		strconv.Itoa(int(unit.Speed)) + " HP: " + strconv.Itoa(unit.Health) + " AP: " + strconv.Itoa(unit.AP)
+	ht.SetText(unitText)
 }
 
 func (ht *HUDText) SetText(text string) {
