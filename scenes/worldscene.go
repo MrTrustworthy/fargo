@@ -4,14 +4,15 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/systems"
 )
 
-type WorldScene struct{}
+type WorldScene struct {
+	EventChannel chan<- events.BaseEvent
+}
 
-func (*WorldScene) Type() string { return "myGame" }
+func (*WorldScene) Type() string { return "Fargo" }
 
 func (*WorldScene) Preload() {
 	engo.Files.Load("models/hero_sprite.png", "fonts/Roboto-Regular.ttf")
@@ -22,7 +23,7 @@ func (scene *WorldScene) Setup(updater engo.Updater) {
 	scene.LoadSystems(world)
 }
 
-func (*WorldScene) LoadSystems(world *ecs.World) {
+func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&common.RenderSystem{})
 	world.AddSystem(&common.MouseSystem{})
 	world.AddSystem(common.NewKeyboardScroller(400, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
@@ -41,6 +42,6 @@ func (*WorldScene) LoadSystems(world *ecs.World) {
 
 	engo.Input.RegisterButton(systems.INPUT_CREATE_UNIT_KEY_BIND, engo.KeyC)
 
-	events.InitEventLogging(fmt.Println)
+	events.InitEventCapturing(scene.EventChannel)
 
 }

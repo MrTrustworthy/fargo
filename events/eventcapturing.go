@@ -15,15 +15,15 @@ var ALL_EVENT_NAMES = []string{
 	INPUT_CREATEUNIT_EVENT_NAME,
 }
 
-func InitEventLogging(outfunc func(a ...interface{}) (i int, e error)) {
+func InitEventCapturing(channel chan<- BaseEvent) {
 
 	for _, eventName := range ALL_EVENT_NAMES {
 		engo.Mailbox.Listen(eventName, func(msg engo.Message) {
 			eventMsg, ok := msg.(BaseEvent)
 			if !ok {
-				panic("Trying to log an event that isn't an action event, this shouldn't happen!" + msg.Type())
+				panic("Trying to log an event that isn't a BaseEvent, this shouldn't happen!" + msg.Type())
 			}
-			outfunc(eventMsg.Type(), eventMsg.AsLogMessage())
+			channel <- eventMsg
 		})
 	}
 

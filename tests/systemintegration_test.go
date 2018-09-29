@@ -1,12 +1,13 @@
-package main
+package tests
 
 import (
 	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/game"
+	"testing"
 )
 
-func main() {
+func TestIntegration(t *testing.T) {
 	eventChan := make(chan events.BaseEvent)
 	go logMsg(eventChan)
 	game.RunGame(eventChan)
