@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"errors"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -13,7 +14,7 @@ type UnitTrackingSystem struct {
 	SelectedUnit *entities.Unit
 }
 
-func (ss *UnitTrackingSystem) Add(unit *entities.Unit) {
+func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
 	ss.Units = append(ss.Units, unit)
 }
 
@@ -76,6 +77,22 @@ func (ss *UnitTrackingSystem) findUnitUnderMouse(tracker *events.MouseTracker) (
 		}
 	}
 	return nil, errors.New("No unit Found")
+}
+
+func (ss *UnitTrackingSystem) RemoveUnit(unit *entities.Unit) {
+	index := -1
+	for i, val := range ss.Units {
+		if val == unit {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		panic("Trying to remove non-existing unit!")
+	}
+	fmt.Println("Length before:", len(ss.Units))
+	ss.Units = append(ss.Units[:index], ss.Units[index+1:]...)
+	fmt.Println("Length after:", len(ss.Units))
 }
 
 func (ss *UnitTrackingSystem) Remove(e ecs.BasicEntity) {}

@@ -16,11 +16,29 @@ func AddToRenderSystem(world *ecs.World, renderable common.Renderable) {
 	}
 }
 
+func RemoveFromRenderSystem(world *ecs.World, renderable common.Renderable) {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Remove(*renderable.GetBasicEntity())
+		}
+	}
+}
+
 func AddToAnimationSystem(world *ecs.World, anim common.Animationable) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *common.AnimationSystem:
 			sys.Add(anim.GetBasicEntity(), anim.GetAnimationComponent(), anim.GetRenderComponent())
+		}
+	}
+}
+
+func RemoveFromAnimationSystem(world *ecs.World, anim common.Animationable) {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.AnimationSystem:
+			sys.Remove(*anim.GetBasicEntity())
 		}
 	}
 }
@@ -38,7 +56,16 @@ func AddToSelectionSystem(world *ecs.World, unit *entities.Unit) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *UnitTrackingSystem:
-			sys.Add(unit)
+			sys.AddUnit(unit)
+		}
+	}
+}
+
+func RemoveFromSelectionSystem(world *ecs.World, unit *entities.Unit) {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *UnitTrackingSystem:
+			sys.RemoveUnit(unit)
 		}
 	}
 }

@@ -40,6 +40,7 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.UnitCollisionSystem{})
 	world.AddSystem(&systems.UnitAbilitySystem{})
 	world.AddSystem(&systems.DamageSystem{})
+	world.AddSystem(&systems.UnitDeathSystem{})
 
 	engo.Input.RegisterButton(systems.INPUT_CREATE_UNIT_KEY_BIND, engo.KeyC)
 
