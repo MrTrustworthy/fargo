@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
@@ -20,14 +19,14 @@ func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
 
 func (ss *UnitTrackingSystem) New(world *ecs.World) {
 
-	engo.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
-	engo.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
-	engo.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
+	events.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
+	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
+	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
 
 }
 
-func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		imsg, ok := msg.(events.InputSelectEvent)
 		if !ok {
 			return
@@ -36,18 +35,18 @@ func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg engo.Message) {
 		if ss.SelectedUnit != nil {
 			deselectedUnit := ss.SelectedUnit
 			ss.SelectedUnit = nil
-			engo.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
+			events.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
 		}
 
 		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
 			ss.SelectedUnit = unit
-			engo.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
+			events.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
 		}
 	}
 }
 
-func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		smsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
@@ -56,8 +55,8 @@ func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg engo.Message) {
 	}
 }
 
-func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		smsg, ok := msg.(events.SelectionDeselectedEvent)
 		if !ok {
 			return

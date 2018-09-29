@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -19,14 +18,14 @@ func (uis *UserInterfaceSystem) New(world *ecs.World) {
 	AddToRenderSystem(uis.World, uis.MainHUD)
 	uis.SelectText = entities.NewHUDText()
 	AddToRenderSystem(uis.World, uis.SelectText)
-	engo.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, uis.getHandleSelectEvent())
-	engo.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, uis.getHandleDeselectEvent())
-	engo.Mailbox.Listen(events.UNIT_ATTRIBUTE_CHANGE_EVENT, uis.getHandleAttributeChangeEvent())
+	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, uis.getHandleSelectEvent())
+	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, uis.getHandleDeselectEvent())
+	events.Mailbox.Listen(events.UNIT_ATTRIBUTE_CHANGE_EVENT, uis.getHandleAttributeChangeEvent())
 
 }
 
-func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		imsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
@@ -35,8 +34,8 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		_, ok := msg.(events.SelectionDeselectedEvent)
 		if !ok {
 			return
@@ -45,8 +44,8 @@ func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg engo.Message) 
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		imsg, ok := msg.(events.UnitAttributesChangedEvent)
 		if !ok {
 			return

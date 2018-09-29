@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -10,20 +9,20 @@ type DamageSystem struct {
 }
 
 func (ds *DamageSystem) New(world *ecs.World) {
-	engo.Mailbox.Listen(events.UNIT_REQUEST_DAMAGE_EVENT, ds.getHandleDamageEvent())
+	events.Mailbox.Listen(events.UNIT_REQUEST_DAMAGE_EVENT, ds.getHandleDamageEvent())
 }
 
-func (ds *DamageSystem) getHandleDamageEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ds *DamageSystem) getHandleDamageEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		imsg, ok := msg.(events.RequestUnitDamageEvent)
 		if !ok {
 			return
 		}
 
 		imsg.Unit.Health -= imsg.Damage
-		engo.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: imsg.Unit})
+		events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: imsg.Unit})
 		if imsg.Unit.Health <= 0 {
-			engo.Mailbox.Dispatch(events.UnitDeathEvent{
+			events.Mailbox.Dispatch(events.UnitDeathEvent{
 				Unit: imsg.Unit,
 			})
 		}

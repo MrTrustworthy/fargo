@@ -2,8 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -15,17 +13,16 @@ type UnitDeathSystem struct {
 
 func (uds *UnitDeathSystem) New(world *ecs.World) {
 	uds.World = world
-	engo.Mailbox.Listen(events.UNIT_DEATH_EVENT, uds.getHandleUnitDeathEvent())
+	events.Mailbox.Listen(events.UNIT_DEATH_EVENT, uds.getHandleUnitDeathEvent())
 }
 
-func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		udmsg, ok := msg.(events.UnitDeathEvent)
 		if !ok {
 			return
 		}
 
-		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 		udmsg.GetAnimationComponent().SelectAnimationByName("dead")
 		uds.dyingUnit = udmsg.Unit
 	}

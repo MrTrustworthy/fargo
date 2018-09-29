@@ -18,13 +18,13 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
-	engo.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
-	engo.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
+	events.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
+	events.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
 
 }
 
-func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		amsg, ok := msg.(events.MovementRequestEvent)
 		if !ok {
 			return
@@ -43,8 +43,8 @@ func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message
 	}
 }
 
-func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		cmsg, ok := msg.(events.CollisionEvent)
 		if !ok {
 			return
@@ -83,7 +83,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 
 	// stop here if movement is not yet finished
 	if len(ums.CurrentPath) > 0 {
-		engo.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
+		events.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
 	} else {
 		ums.StopMovement()
 	}
@@ -108,7 +108,7 @@ func (ums *UnitMovementSystem) StopMovement() {
 	ums.CurrentPath = nil
 	ums.LastPosition = engo.Point{}
 	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	engo.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit})
+	events.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit})
 }
 
 func InterpolateBetween(a, b engo.Point, stepSize float32) []engo.Point {
@@ -150,7 +150,7 @@ func ShortenPathToStopDistance(plannedPath []engo.Point, target engo.Point, stop
 }
 
 func dispatchMoveTo(x, y, dist float32) {
-	engo.Mailbox.Dispatch(events.MovementRequestEvent{
+	events.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         engo.Point{X: x, Y: y},
 		StopAtDistance: dist,
 	})

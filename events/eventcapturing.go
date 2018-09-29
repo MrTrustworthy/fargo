@@ -1,7 +1,5 @@
 package events
 
-import "engo.io/engo"
-
 var ALL_EVENT_NAMES = []string{
 	COLLISON_EVENT_NAME,
 	MOVEMENT_REQUESTMOVE_EVENT_NAME,
@@ -24,12 +22,8 @@ var ALL_EVENT_NAMES = []string{
 func InitEventCapturing(channel chan<- BaseEvent) {
 
 	for _, eventName := range ALL_EVENT_NAMES {
-		engo.Mailbox.Listen(eventName, func(msg engo.Message) {
-			eventMsg, ok := msg.(BaseEvent)
-			if !ok {
-				panic("Trying to log an event that isn't a BaseEvent, this shouldn't happen!" + msg.Type())
-			}
-			channel <- eventMsg
+		Mailbox.PriorityListen(eventName, func(msg BaseEvent) {
+			channel <- msg
 		})
 	}
 

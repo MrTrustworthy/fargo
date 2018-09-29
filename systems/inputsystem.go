@@ -29,17 +29,17 @@ func (is *InputSystem) Update(dt float32) {
 	if engo.Input.Mouse.Action == engo.Press {
 
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
-			engo.Mailbox.Dispatch(events.InputSelectEvent{
+			events.Mailbox.Dispatch(events.InputSelectEvent{
 				MouseTracker: is.MouseTracker,
 			})
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
-			engo.Mailbox.Dispatch(events.InputInteractEvent{
+			events.Mailbox.Dispatch(events.InputInteractEvent{
 				MouseTracker: is.MouseTracker,
 			})
 		}
 
 	} else if engo.Input.Button(INPUT_CREATE_UNIT_KEY_BIND).JustPressed() {
-		engo.Mailbox.Dispatch(events.InputCreateunitEvent{
+		events.Mailbox.Dispatch(events.InputCreateunitEvent{
 			MouseTracker: is.MouseTracker,
 		})
 	}

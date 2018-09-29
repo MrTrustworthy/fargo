@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -14,12 +13,12 @@ type UnitAbilitySystem struct {
 
 func (uas *UnitAbilitySystem) New(world *ecs.World) {
 	uas.world = world
-	engo.Mailbox.Listen(events.ABILITY_REQUESTUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
+	events.Mailbox.Listen(events.ABILITY_REQUESTUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
 
 }
 
-func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		ramsg, ok := msg.(events.RequestAbilityUseEvent)
 		if !ok {
 			return
@@ -45,31 +44,31 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg engo.Messa
 
 func executeAbility(ability entities.Ability) {
 	if !ability.CanExecute() {
-		engo.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
+		events.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
 		return
 	}
 
 	ability.Source().AP -= ability.Cost()
-	engo.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
+	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
 	ability.Source().AnimationComponent.SelectAnimationByName(ability.AnimationName())
 
-	engo.Mailbox.Dispatch(events.RequestUnitDamageEvent{
+	events.Mailbox.Dispatch(events.RequestUnitDamageEvent{
 		Unit:   ability.Target(),
 		Damage: ability.Damage(),
 	})
 
 	if ability.Target().Health <= 0 {
-		engo.Mailbox.Dispatch(events.UnitDeathEvent{
+		events.Mailbox.Dispatch(events.UnitDeathEvent{
 			Unit: ability.Target(),
 		})
 	}
-	engo.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
+	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
 }
 
 func moveCloserAndRetry(originUnit, targetUnit *entities.Unit) {
 	// TODO handle cases where a current movement is ongoing and no new movement is started,
 	// TODO but the ability use is still queued
-	events.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
+	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 		dispatchAttackUnit(originUnit, targetUnit)
 	})
 	dispatchMoveTo(targetUnit.Center().X, targetUnit.Center().Y, originUnit.SelectedAbility.Maxrange())
@@ -77,7 +76,7 @@ func moveCloserAndRetry(originUnit, targetUnit *entities.Unit) {
 
 func dispatchAttackUnit(originUnit, targetUnit *entities.Unit) {
 	originUnit.SelectedAbility.SetTarget(targetUnit)
-	engo.Mailbox.Dispatch(events.RequestAbilityUseEvent{
+	events.Mailbox.Dispatch(events.RequestAbilityUseEvent{
 		Ability: &originUnit.SelectedAbility,
 	})
 }

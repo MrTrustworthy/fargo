@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"engo.io/engo/common"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -13,11 +12,11 @@ type UnitCollisionSystem struct {
 
 func (ucs *UnitCollisionSystem) New(world *ecs.World) {
 	ucs.world = world
-	engo.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
+	events.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
 }
 
-func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg engo.Message) {
-	return func(msg engo.Message) {
+func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		mmsg, ok := msg.(events.MovementStepEvent)
 		if !ok {
 			return
@@ -35,7 +34,7 @@ func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg engo.Message) 
 			if !common.IsIntersecting(unitHitbox, otherHitbox) {
 				continue
 			}
-			engo.Mailbox.Dispatch(events.CollisionEvent{
+			events.Mailbox.Dispatch(events.CollisionEvent{
 				ActiveUnit:  mmsg.Unit,
 				PassiveUnit: other,
 			})
