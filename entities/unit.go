@@ -70,6 +70,7 @@ func NewUnit(point *engo.Point) *Unit {
 			AP:     7,
 		},
 	}
+	unit.RenderComponent.SetZIndex(50)
 
 	unit.SelectedAbility = NewStabAbility(unit)
 	return unit

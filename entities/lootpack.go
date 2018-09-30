@@ -12,7 +12,7 @@ type Lootpack struct {
 	common.RenderComponent
 }
 
-const LOOTPACKSIZE = 64
+const LOOTPACKSIZE = 32
 
 func NewLootpack(point *engo.Point) *Lootpack {
 
