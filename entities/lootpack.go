@@ -10,6 +10,7 @@ type Lootpack struct {
 	ecs.BasicEntity
 	common.SpaceComponent
 	common.RenderComponent
+	*Inventory
 }
 
 const LOOTPACKSIZE = 32
@@ -32,6 +33,7 @@ func NewLootpack(point *engo.Point) *Lootpack {
 			Drawable: sprite,
 			Scale:    engo.Point{1, 1},
 		},
+		Inventory: NewSampleInventory(),
 	}
 
 	return lootpack

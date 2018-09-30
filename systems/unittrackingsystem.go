@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"errors"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -11,6 +10,7 @@ import (
 type UnitTrackingSystem struct {
 	Units        []*entities.Unit
 	SelectedUnit *entities.Unit
+	*ecs.World
 }
 
 func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
@@ -18,11 +18,10 @@ func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
 }
 
 func (ss *UnitTrackingSystem) New(world *ecs.World) {
-
+	ss.World = world
 	events.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
 	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
 	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
-
 }
 
 func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
@@ -89,9 +88,9 @@ func (ss *UnitTrackingSystem) RemoveUnit(unit *entities.Unit) {
 	if index == -1 {
 		panic("Trying to remove non-existing unit!")
 	}
-	fmt.Println("Length before:", len(ss.Units))
 	ss.Units = append(ss.Units[:index], ss.Units[index+1:]...)
-	fmt.Println("Length after:", len(ss.Units))
+	RemoveFromRenderSystem(ss.World, unit)
+	RemoveFromAnimationSystem(ss.World, unit)
 }
 
 func (ss *UnitTrackingSystem) Remove(e ecs.BasicEntity) {}

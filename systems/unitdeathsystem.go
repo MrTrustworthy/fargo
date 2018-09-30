@@ -28,12 +28,6 @@ func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg events.BaseEvent)
 	}
 }
 
-func (uds *UnitDeathSystem) removeDyingUnit() {
-	RemoveFromRenderSystem(uds.World, uds.dyingUnit)
-	RemoveFromAnimationSystem(uds.World, uds.dyingUnit)
-	RemoveFromSelectionSystem(uds.World, uds.dyingUnit)
-}
-
 func (uds *UnitDeathSystem) Update(dt float32) {
 	if uds.dyingUnit == nil {
 		return
@@ -42,7 +36,8 @@ func (uds *UnitDeathSystem) Update(dt float32) {
 	animation := uds.dyingUnit.GetAnimationComponent().CurrentAnimation
 	if animation != nil && animation.Name != "dead" {
 		lootPosition := uds.dyingUnit.GetSpaceComponent().Center()
-		uds.removeDyingUnit()
+		// TODO this should happen via events
+		RemoveFromSelectionSystem(uds.World, uds.dyingUnit)
 		uds.dyingUnit = nil
 		events.Mailbox.Dispatch(events.RequestLootSpawn{Point: lootPosition})
 	}

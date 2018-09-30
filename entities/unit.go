@@ -21,6 +21,7 @@ type Unit struct {
 	common.RenderComponent
 	common.AnimationComponent
 	SelectedAbility Ability
+	*Inventory
 }
 
 const UNITSIZE = 64
@@ -69,6 +70,7 @@ func NewUnit(point *engo.Point) *Unit {
 			Health: 10,
 			AP:     7,
 		},
+		Inventory: NewSampleInventory(),
 	}
 	unit.RenderComponent.SetZIndex(50)
 

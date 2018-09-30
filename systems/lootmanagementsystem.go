@@ -2,11 +2,12 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo"
 	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
+
+const LOOT_PICKUP_DISTANCE = 20.0
 
 type LootManagementSystem struct {
 	*ecs.World
@@ -16,6 +17,8 @@ type LootManagementSystem struct {
 func (lss *LootManagementSystem) New(world *ecs.World) {
 	lss.World = world
 	events.Mailbox.Listen(events.LOOT_REQUEST_SPAWN_EVENT, lss.getHandleRequestLootSpawn())
+	events.Mailbox.Listen(events.LOOT_REQUEST_PICKUP_EVENT, lss.getHandleRequestLootPickup())
+
 }
 
 func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.BaseEvent) {
@@ -25,14 +28,40 @@ func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.Bas
 			return
 		}
 
-		lss.createRandomLoot(&udmsg.Point)
+		lootpack := entities.NewLootpack(&udmsg.Point)
+		lss.ActiveLootPacks = append(lss.ActiveLootPacks, lootpack)
+		AddToRenderSystem(lss.World, lootpack)
 	}
 }
 
-func (lss *LootManagementSystem) createRandomLoot(position *engo.Point) {
-	lootpack := entities.NewLootpack(position)
-	lss.ActiveLootPacks = append(lss.ActiveLootPacks, lootpack)
-	AddToRenderSystem(lss.World, lootpack)
+func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
+		udmsg, ok := msg.(events.RequestLootPickupEvent)
+		if !ok {
+			return
+		}
+		unitPosititon, packPosition := udmsg.Unit.Center(), udmsg.Lootpack.Center()
+		currentDistance := unitPosititon.PointDistance(packPosition)
+		if currentDistance <= LOOT_PICKUP_DISTANCE {
+			lss.executePickup(&udmsg)
+		} else {
+			moveCloserAndRetryPickup(&udmsg)
+		}
+
+	}
+}
+
+func (lss *LootManagementSystem) executePickup(pickupEvent *events.RequestLootPickupEvent) {
+	pickupEvent.Unit.Inventory.FillFrom(*pickupEvent.Lootpack.Inventory)
+	lss.RemoveLootbox(pickupEvent.Lootpack)
+	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: pickupEvent.Unit})
+}
+
+func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
+	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+		events.Mailbox.Dispatch(*pickupEvent)
+	})
+	dispatchMoveTo(pickupEvent.Lootpack.Center().X, pickupEvent.Lootpack.Center().Y, LOOT_PICKUP_DISTANCE)
 }
 
 func (lss *LootManagementSystem) FindLootUnderMouse(tracker *events.MouseTracker) (*entities.Lootpack, error) {
@@ -44,6 +73,21 @@ func (lss *LootManagementSystem) FindLootUnderMouse(tracker *events.MouseTracker
 		}
 	}
 	return nil, errors.New("No lootpack Found")
+}
+
+func (lss *LootManagementSystem) RemoveLootbox(lootpack *entities.Lootpack) {
+	index := -1
+	for i, val := range lss.ActiveLootPacks {
+		if val == lootpack {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		panic("Trying to remove non-existing unit!")
+	}
+	lss.ActiveLootPacks = append(lss.ActiveLootPacks[:index], lss.ActiveLootPacks[index+1:]...)
+	RemoveFromRenderSystem(lss.World, lootpack)
 }
 
 func (lss *LootManagementSystem) Update(dt float32) {}

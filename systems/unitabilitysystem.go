@@ -32,12 +32,12 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 		source, target := (*ramsg.Ability).Source(), (*ramsg.Ability).Target()
 		sourcePosition := source.GetSpaceComponent().Center()
 		currentDistance := sourcePosition.PointDistance(target.GetSpaceComponent().Center())
-
+		// TODO maybe only pass the event here in both cases like for lootmanagement as well?
 		if currentDistance <= source.SelectedAbility.Maxrange() {
 			executeAbility(*ramsg.Ability)
 		} else {
 			fmt.Println("Can't attack, distance too great:", currentDistance, "trying again")
-			moveCloserAndRetry(source, target)
+			moveCloserAndRetryAbility(source, target)
 		}
 	}
 }
@@ -65,7 +65,7 @@ func executeAbility(ability entities.Ability) {
 	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
 }
 
-func moveCloserAndRetry(originUnit, targetUnit *entities.Unit) {
+func moveCloserAndRetryAbility(originUnit, targetUnit *entities.Unit) {
 	// TODO handle cases where a current movement is ongoing and no new movement is started,
 	// TODO but the ability use is still queued
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
