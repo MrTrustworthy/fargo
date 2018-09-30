@@ -32,6 +32,7 @@ func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg events.BaseEvent) 
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
 func (ucs *UnitCreationSystem) createRandomUnit(tracker events.MouseTracker) {
+	// TODO this should not need a mouse tracker but a position
 	unit := entities.NewUnit(&engo.Point{
 		X: tracker.MouseX + entities.UNIT_CENTER_OFFSET.X,
 		Y: tracker.MouseY + entities.UNIT_CENTER_OFFSET.Y,
