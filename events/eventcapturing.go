@@ -18,8 +18,10 @@ var ALL_EVENT_NAMES = []string{
 	ABILITY_ABORT_EVENT_NAME,
 	UNIT_ATTRIBUTE_CHANGE_EVENT,
 	LOOT_REQUEST_SPAWN_EVENT,
+	LOOT_REQUEST_PICKUP_EVENT,
 }
 
+// TODO make this part of the eventmanager
 func InitEventCapturing(channel chan<- BaseEvent) {
 
 	for _, eventName := range ALL_EVENT_NAMES {

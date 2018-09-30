@@ -91,6 +91,16 @@ func GetUnitMovementSystem(world *ecs.World) *UnitMovementSystem {
 	return nil
 }
 
+func GetLootmanagementSystem(world *ecs.World) *LootManagementSystem {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *LootManagementSystem:
+			return sys
+		}
+	}
+	return nil
+}
+
 func GetAllExistingUnits(world *ecs.World) []*entities.Unit {
 	return GetUnitTrackingSystem(world).Units
 }
@@ -101,6 +111,10 @@ func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
 
 func FindUnitUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Unit, error) {
 	return GetUnitTrackingSystem(world).findUnitUnderMouse(tracker)
+}
+
+func FindLootUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Lootpack, error) {
+	return GetLootmanagementSystem(world).FindLootUnderMouse(tracker)
 }
 
 func MovementIsCurrentlyProcessing(world *ecs.World) bool {
