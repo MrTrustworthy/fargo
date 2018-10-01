@@ -25,7 +25,10 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 			if clickedUnit == selectedUnit {
 				return
 			}
-			dispatchAttackUnit(selectedUnit, clickedUnit)
+			selectedUnit.SelectedAbility.SetTarget(clickedUnit)
+			events.Mailbox.Dispatch(events.RequestAbilityUseEvent{
+				Ability: &selectedUnit.SelectedAbility,
+			})
 		} else if clickedLootpack, err := FindLootUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
 			events.Mailbox.Dispatch(events.RequestLootPickupEvent{
 				Unit:     selectedUnit,

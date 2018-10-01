@@ -25,7 +25,6 @@ func (is *InputSystem) New(world *ecs.World) {
 }
 
 func (is *InputSystem) Update(dt float32) {
-	// TODO write a system that takes all events in the mailbox and logs them
 	if engo.Input.Mouse.Action == engo.Press {
 
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {

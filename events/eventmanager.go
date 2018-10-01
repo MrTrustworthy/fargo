@@ -1,11 +1,13 @@
 package events
 
 var (
-	Mailbox *EventManager
+	Mailbox        *EventManager
+	CaptureChannel chan BaseEvent
 )
 
 func init() {
 	Mailbox = &EventManager{}
+	CaptureChannel = make(chan BaseEvent)
 }
 
 type EventMap map[string][]EventHandler
@@ -25,6 +27,8 @@ type EventManager struct {
 
 // Dispatch sends a message to all subscribed handlers of the message's type
 func (mm *EventManager) Dispatch(message BaseEvent) {
+	CaptureChannel <- message
+
 	priorityHandlers := mm.priorityListeners[message.Type()]
 	for _, handler := range priorityHandlers {
 		handler(message)

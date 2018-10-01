@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"errors"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
@@ -38,6 +39,11 @@ func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.Ba
 	return func(msg events.BaseEvent) {
 		udmsg, ok := msg.(events.RequestLootPickupEvent)
 		if !ok {
+			return
+		}
+		if MovementIsCurrentlyProcessing(lss.World) {
+			// Can't start pickup as long as movement is still ongoing
+			fmt.Println("Can't start attack since movement is still in progress")
 			return
 		}
 		unitPosititon, packPosition := udmsg.Unit.Center(), udmsg.Lootpack.Center()

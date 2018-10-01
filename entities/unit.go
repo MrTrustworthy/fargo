@@ -26,13 +26,6 @@ type Unit struct {
 
 const UNITSIZE = 64
 
-// describes the offset we need to add to a given unit position to get the "visual" center of the unit
-// TODO check if we can use SpaceComponent.SetCenter() instead!
-var UNIT_CENTER_OFFSET = engo.Point{
-	X: -UNITSIZE / 2,
-	Y: -UNITSIZE / 1.5,
-}
-
 var idleAnimation = &common.Animation{Name: "idle", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7}}
 var jumpAnimation = &common.Animation{Name: "jump", Frames: []int{8, 9, 10, 11, 12}}
 var stabAnimation = &common.Animation{Name: "stab", Frames: []int{13, 14, 15, 16, 17}}
@@ -43,7 +36,7 @@ var spawnAnimation = &common.Animation{Name: "spawn", Frames: []int{35, 36, 37, 
 var upstabAnimation = &common.Animation{Name: "upstab", Frames: []int{41, 42, 43, 44, 45}}
 var allAnimations = []*common.Animation{idleAnimation, jumpAnimation, stabAnimation, walkAnimation, deadAnimation, duckAnimation, spawnAnimation, upstabAnimation}
 
-func NewUnit(point *engo.Point) *Unit {
+func NewUnit() *Unit {
 
 	spriteSheet := common.NewSpritesheetFromFile("models/hero_sprite.png", UNITSIZE, UNITSIZE)
 
@@ -55,7 +48,7 @@ func NewUnit(point *engo.Point) *Unit {
 	unit := &Unit{
 		BasicEntity: ecs.NewBasic(),
 		SpaceComponent: common.SpaceComponent{
-			Position: *point,
+			Position: engo.Point{X: 0, Y: 0}, // should be set by whoever creates this unit via SetCenter()
 			Width:    UNITSIZE,
 			Height:   UNITSIZE,
 		},

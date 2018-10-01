@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"fmt"
-	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -19,7 +18,7 @@ func (uas *UnitAbilitySystem) New(world *ecs.World) {
 
 func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
-		ramsg, ok := msg.(events.RequestAbilityUseEvent)
+		raue, ok := msg.(events.RequestAbilityUseEvent)
 		if !ok {
 			return
 		}
@@ -29,20 +28,21 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 			return
 		}
 
-		source, target := (*ramsg.Ability).Source(), (*ramsg.Ability).Target()
+		source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
 		sourcePosition := source.GetSpaceComponent().Center()
 		currentDistance := sourcePosition.PointDistance(target.GetSpaceComponent().Center())
-		// TODO maybe only pass the event here in both cases like for lootmanagement as well?
+
 		if currentDistance <= source.SelectedAbility.Maxrange() {
-			executeAbility(*ramsg.Ability)
+			executeAbility(&raue)
 		} else {
 			fmt.Println("Can't attack, distance too great:", currentDistance, "trying again")
-			moveCloserAndRetryAbility(source, target)
+			moveCloserAndRetryAbility(&raue)
 		}
 	}
 }
 
-func executeAbility(ability entities.Ability) {
+func executeAbility(raue *events.RequestAbilityUseEvent) {
+	ability := *raue.Ability
 	if !ability.CanExecute() {
 		events.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
 		return
@@ -65,20 +65,12 @@ func executeAbility(ability entities.Ability) {
 	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
 }
 
-func moveCloserAndRetryAbility(originUnit, targetUnit *entities.Unit) {
-	// TODO handle cases where a current movement is ongoing and no new movement is started,
-	// TODO but the ability use is still queued
+func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
+	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
-		dispatchAttackUnit(originUnit, targetUnit)
+		events.Mailbox.Dispatch(raue)
 	})
-	dispatchMoveTo(targetUnit.Center().X, targetUnit.Center().Y, originUnit.SelectedAbility.Maxrange())
-}
-
-func dispatchAttackUnit(originUnit, targetUnit *entities.Unit) {
-	originUnit.SelectedAbility.SetTarget(targetUnit)
-	events.Mailbox.Dispatch(events.RequestAbilityUseEvent{
-		Ability: &originUnit.SelectedAbility,
-	})
+	dispatchMoveTo(target.Center().X, target.Center().Y, source.SelectedAbility.Maxrange())
 }
 
 func (uas *UnitAbilitySystem) Update(dt float32) {}

@@ -49,7 +49,6 @@ func NewHUDText() *HUDText {
 }
 
 func (ht *HUDText) SetTextForUnit(unit *Unit) {
-	// TODO text should also be updated whenever the inventory changes
 	unitText := "Unit: " + unit.Name + "\nSelected Attack: " + unit.SelectedAbility.Name() + "\nSpeed:" +
 		strconv.Itoa(int(unit.Speed)) + " HP: " + strconv.Itoa(unit.Health) + " AP: " + strconv.Itoa(unit.AP) + " | " +
 		unit.Inventory.String()

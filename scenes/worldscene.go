@@ -4,13 +4,10 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
-	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/systems"
 )
 
-type WorldScene struct {
-	EventChannel chan<- events.BaseEvent
-}
+type WorldScene struct{}
 
 func (*WorldScene) Type() string { return "Fargo" }
 
@@ -44,7 +41,5 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.LootManagementSystem{})
 
 	engo.Input.RegisterButton(systems.INPUT_CREATE_UNIT_KEY_BIND, engo.KeyC)
-
-	events.InitEventCapturing(scene.EventChannel)
 
 }

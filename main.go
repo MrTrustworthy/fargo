@@ -7,14 +7,15 @@ import (
 )
 
 func main() {
-	eventChan := make(chan events.BaseEvent)
-	go logMsg(eventChan)
-	game.RunGame(eventChan)
+	go logMsg(events.CaptureChannel)
+	game.RunGame()
 }
 
 func logMsg(eventChan chan events.BaseEvent) {
 	for true {
 		msg := <-eventChan
-		fmt.Println(msg.Type(), msg.AsLogMessage())
+		if msg.Type() != events.MOVEMENT_STEP_EVENT_NAME {
+			fmt.Println(msg.Type(), msg.AsLogMessage())
+		}
 	}
 }
