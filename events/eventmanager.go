@@ -21,18 +21,12 @@ type EventHandler func(msg BaseEvent)
 // MessageManager manages messages and subscribed handlers
 type EventManager struct {
 	listeners         EventMap
-	priorityListeners EventMap
 	onceListeners     EventMap
 }
 
 // Dispatch sends a message to all subscribed handlers of the message's type
 func (mm *EventManager) Dispatch(message BaseEvent) {
 	CaptureChannel <- message
-
-	priorityHandlers := mm.priorityListeners[message.Type()]
-	for _, handler := range priorityHandlers {
-		handler(message)
-	}
 
 	onceHandlers := mm.onceListeners[message.Type()]
 	for _, handler := range onceHandlers {
@@ -54,14 +48,6 @@ func (mm *EventManager) Listen(messageType string, handler EventHandler) {
 		mm.listeners = make(EventMap)
 	}
 	mm.listeners[messageType] = append(mm.listeners[messageType], handler)
-}
-
-// Listen subscribes to the specified message type and calls the specified handler when fired
-func (mm *EventManager) PriorityListen(messageType string, handler EventHandler) {
-	if mm.priorityListeners == nil {
-		mm.priorityListeners = make(EventMap)
-	}
-	mm.priorityListeners[messageType] = append(mm.priorityListeners[messageType], handler)
 }
 
 // Listen subscribes to the specified message type and calls the specified handler when fired

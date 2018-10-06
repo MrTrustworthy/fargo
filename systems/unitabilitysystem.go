@@ -68,7 +68,7 @@ func executeAbility(raue *events.RequestAbilityUseEvent) {
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
-		events.Mailbox.Dispatch(raue)
+		events.Mailbox.Dispatch(*raue)
 	})
 	events.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         target.Center(),
