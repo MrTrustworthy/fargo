@@ -17,6 +17,7 @@ type MouseTracker struct {
 	common.MouseComponent
 }
 
+// TODO remove mouse tracker, replace with point
 type InputSelectEvent struct {
 	MouseTracker
 }
@@ -26,6 +27,7 @@ func (ie InputSelectEvent) AsLogMessage() string {
 	return getInputEventLogMessage(ie.MouseTracker)
 }
 
+// TODO remove mouse tracker, replace with point
 type InputInteractEvent struct {
 	MouseTracker
 }
@@ -36,13 +38,13 @@ func (ie InputInteractEvent) AsLogMessage() string {
 }
 
 type InputCreateunitEvent struct {
-	MouseTracker
+	engo.Point
 }
 
 func (ie InputCreateunitEvent) Type() string { return INPUT_CREATEUNIT_EVENT_NAME }
 func (ie InputCreateunitEvent) AsLogMessage() string {
-	return getInputEventLogMessage(ie.MouseTracker)
-}
+	x, y := PointToXYStrings(ie.Point)
+	return " on mouse position (" + x + ":" + y + ")"}
 
 func getInputEventLogMessage(tracker MouseTracker) string {
 	x, y := PointToXYStrings(engo.Point{tracker.MouseX, tracker.MouseY})

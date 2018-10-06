@@ -25,16 +25,15 @@ func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg events.BaseEvent) 
 		if !ok {
 			return
 		}
-		ucs.createRandomUnit(imsg.MouseTracker)
+		ucs.createRandomUnit(imsg.Point)
 	}
 }
 
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
-func (ucs *UnitCreationSystem) createRandomUnit(tracker events.MouseTracker) {
-	// TODO this should not need a mouse tracker but a position
+func (ucs *UnitCreationSystem) createRandomUnit(point engo.Point) {
 	unit := entities.NewUnit()
-	unit.SetCenter(engo.Point{X: tracker.MouseX, Y: tracker.MouseY})
+	unit.SetCenter(point)
 	fmt.Println("name of the new unit is", unit.Name)
 	AddToRenderSystem(ucs.World, unit)
 	AddToAnimationSystem(ucs.World, unit)

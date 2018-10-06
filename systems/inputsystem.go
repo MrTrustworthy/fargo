@@ -39,7 +39,7 @@ func (is *InputSystem) Update(dt float32) {
 
 	} else if engo.Input.Button(INPUT_CREATE_UNIT_KEY_BIND).JustPressed() {
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{
-			MouseTracker: is.MouseTracker,
+			Point: engo.Point{X: is.MouseTracker.MouseX, Y: is.MouseTracker.MouseY},
 		})
 	}
 
