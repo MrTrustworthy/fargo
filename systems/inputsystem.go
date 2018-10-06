@@ -9,6 +9,7 @@ import (
 
 const (
 	INPUT_CREATE_UNIT_KEY_BIND = "CreateUnit"
+	INPUT_RUN_TESTS_KEY_BIND   = "RunTests"
 )
 
 type MouseTracker struct {
@@ -47,9 +48,9 @@ func (is *InputSystem) Update(dt float32) {
 		}
 
 	} else if engo.Input.Button(INPUT_CREATE_UNIT_KEY_BIND).JustPressed() {
-		events.Mailbox.Dispatch(events.InputCreateunitEvent{
-			Point: is.MouseTracker.toPoint(),
-		})
+		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: is.MouseTracker.toPoint()})
+	} else if engo.Input.Button(INPUT_RUN_TESTS_KEY_BIND).JustPressed() {
+		events.Mailbox.Dispatch(events.TestBasicAttackEvent{})
 	}
 
 }
