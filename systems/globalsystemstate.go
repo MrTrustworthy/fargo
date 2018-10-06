@@ -61,15 +61,6 @@ func AddToSelectionSystem(world *ecs.World, unit *entities.Unit) {
 	}
 }
 
-func RemoveFromSelectionSystem(world *ecs.World, unit *entities.Unit) {
-	for _, system := range world.Systems() {
-		switch sys := system.(type) {
-		case *UnitTrackingSystem:
-			sys.RemoveUnit(unit)
-		}
-	}
-}
-
 // Those functions are used to get global unit state like all units, selected units, units under mouse etc
 func GetUnitTrackingSystem(world *ecs.World) *UnitTrackingSystem {
 	for _, system := range world.Systems() {

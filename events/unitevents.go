@@ -9,6 +9,7 @@ const (
 	UNIT_REQUEST_DAMAGE_EVENT   = "RequestUnitDamageEvent"
 	UNIT_DEATH_EVENT            = "UnitDeathEvent"
 	UNIT_ATTRIBUTE_CHANGE_EVENT = "UnitAttributesChangedEvent"
+	UNIT_REMOVAL_EVENT          = "UnitRemovalEvent"
 )
 
 type RequestUnitDamageEvent struct {
@@ -30,6 +31,16 @@ func (de UnitDeathEvent) Type() string { return UNIT_DEATH_EVENT }
 
 func (de UnitDeathEvent) AsLogMessage() string {
 	return "Unit died:" + de.Unit.Name
+}
+
+type UnitRemovalEvent struct {
+	*entities.Unit
+}
+
+func (de UnitRemovalEvent) Type() string { return UNIT_REMOVAL_EVENT }
+
+func (de UnitRemovalEvent) AsLogMessage() string {
+	return "Unit removed:" + de.Unit.Name
 }
 
 type UnitAttributesChangedEvent struct {
