@@ -9,6 +9,7 @@ import (
 const (
 	LOOT_REQUEST_SPAWN_EVENT  = "RequestUnitDamageEvent"
 	LOOT_REQUEST_PICKUP_EVENT = "RequestLootPickupEvent"
+	LOOT_HAS_SPAWNED_EVENT = "LootHasSpawnedEvent"
 )
 
 type RequestLootSpawn struct {
@@ -30,4 +31,14 @@ func (se RequestLootPickupEvent) Type() string { return LOOT_REQUEST_PICKUP_EVEN
 
 func (se RequestLootPickupEvent) AsLogMessage() string {
 	return "Unit " + se.Unit.Name + " should pickup lootpack"
+}
+
+type LootHasSpawnedEvent struct {
+	*entities.Lootpack
+}
+
+func (se LootHasSpawnedEvent) Type() string { return LOOT_HAS_SPAWNED_EVENT }
+
+func (se LootHasSpawnedEvent) AsLogMessage() string {
+	return "Loot has spawned"
 }

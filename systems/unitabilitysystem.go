@@ -3,11 +3,13 @@ package systems
 import (
 	"engo.io/ecs"
 	"fmt"
+	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
 type UnitAbilitySystem struct {
-	world *ecs.World
+	world            *ecs.World
+	executingAbility entities.Ability
 }
 
 func (uas *UnitAbilitySystem) New(world *ecs.World) {
@@ -22,7 +24,7 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 		if !ok {
 			return
 		}
-		if MovementIsCurrentlyProcessing(uas.world) {
+		if WorldIsCurrentlyBusy(uas.world) {
 			// Can't start attack as long as movement is still ongoing
 			fmt.Println("Can't start attack since movement is still in progress")
 			return
@@ -33,7 +35,7 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 		currentDistance := sourcePosition.PointDistance(target.GetSpaceComponent().Center())
 
 		if currentDistance <= source.SelectedAbility.Maxrange() {
-			executeAbility(&raue)
+			uas.executeAbility(&raue)
 		} else {
 			fmt.Println("Can't attack, distance too great:", currentDistance, "trying again")
 			moveCloserAndRetryAbility(&raue)
@@ -41,28 +43,15 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 	}
 }
 
-func executeAbility(raue *events.RequestAbilityUseEvent) {
+func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent) {
 	ability := *raue.Ability
 	if !ability.CanExecute() {
 		events.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
 		return
 	}
-
-	ability.Source().AP -= ability.Cost()
-	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
+	uas.executingAbility = ability
 	ability.Source().AnimationComponent.SelectAnimationByName(ability.AnimationName())
 
-	events.Mailbox.Dispatch(events.RequestUnitDamageEvent{
-		Unit:   ability.Target(),
-		Damage: ability.Damage(),
-	})
-
-	if ability.Target().Health <= 0 {
-		events.Mailbox.Dispatch(events.UnitDeathEvent{
-			Unit: ability.Target(),
-		})
-	}
-	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
 }
 
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
@@ -77,6 +66,39 @@ func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	})
 }
 
-func (uas *UnitAbilitySystem) Update(dt float32) {}
+func (uas *UnitAbilitySystem) Update(dt float32) {
+	// no ability in progress
+	if uas.executingAbility == nil {
+		return
+	}
+
+	// ability is still in progress, not yet completed
+	animation := uas.executingAbility.Source().GetAnimationComponent().CurrentAnimation
+	if animation == nil || animation.Name == uas.executingAbility.AnimationName() {
+		return
+	}
+
+	// actually execute the results of the ability
+	ability := uas.executingAbility
+	ability.Source().AP -= ability.Cost()
+	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
+
+	events.Mailbox.Dispatch(events.RequestUnitDamageEvent{
+		Unit:   ability.Target(),
+		Damage: ability.Damage(),
+	})
+
+	if ability.Target().Health <= 0 {
+		events.Mailbox.Dispatch(events.UnitDeathEvent{
+			Unit: ability.Target(),
+		})
+	}
+	uas.executingAbility = nil
+	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
+}
+
+func (uas *UnitAbilitySystem) IsIdle() bool {
+	return uas.executingAbility == nil
+}
 
 func (uas *UnitAbilitySystem) Remove(e ecs.BasicEntity) {}

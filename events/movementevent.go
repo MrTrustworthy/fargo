@@ -18,7 +18,7 @@ type MovementCompletedEvent struct {
 func (me MovementCompletedEvent) Type() string { return MOVEMENT_COMPLETED_EVENT_NAME }
 
 func (me MovementCompletedEvent) AsLogMessage() string {
-	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)
+	x, y := PointToXYStrings(me.Unit.SpaceComponent.Center())
 	return "for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
 }
 

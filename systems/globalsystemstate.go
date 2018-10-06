@@ -7,6 +7,11 @@ import (
 	"github.com/MrTrustworthy/fargo/entities"
 )
 
+// Blocking systems are systems that must be idle before some actions (movement, attacking, ...) can be started
+type BlockingSystem interface {
+	IsIdle() bool
+}
+
 func AddToRenderSystem(world *ecs.World, renderable common.Renderable) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
@@ -82,6 +87,16 @@ func GetUnitMovementSystem(world *ecs.World) *UnitMovementSystem {
 	return nil
 }
 
+func GetUnitAbilitySystem(world *ecs.World) *UnitAbilitySystem {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *UnitAbilitySystem:
+			return sys
+		}
+	}
+	return nil
+}
+
 func GetLootmanagementSystem(world *ecs.World) *LootManagementSystem {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
@@ -108,6 +123,11 @@ func FindLootUnderMouse(world *ecs.World, point engo.Point) (*entities.Lootpack,
 	return GetLootmanagementSystem(world).FindLootUnderMouse(point)
 }
 
-func MovementIsCurrentlyProcessing(world *ecs.World) bool {
-	return !GetUnitMovementSystem(world).IsIdle()
+func WorldIsCurrentlyBusy(world *ecs.World) bool {
+	for _, system := range world.Systems() {
+		if sys, ok := system.(BlockingSystem); ok && !sys.IsIdle(){
+			return true
+		}
+	}
+	return false
 }

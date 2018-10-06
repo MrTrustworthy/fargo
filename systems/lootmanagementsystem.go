@@ -33,6 +33,7 @@ func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.Bas
 		lootpack := entities.NewLootpack(&udmsg.Point)
 		lss.ActiveLootPacks = append(lss.ActiveLootPacks, lootpack)
 		AddToRenderSystem(lss.World, lootpack)
+		events.Mailbox.Dispatch(events.LootHasSpawnedEvent{Lootpack: lootpack})
 	}
 }
 
@@ -42,7 +43,7 @@ func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.Ba
 		if !ok {
 			return
 		}
-		if MovementIsCurrentlyProcessing(lss.World) {
+		if WorldIsCurrentlyBusy(lss.World) {
 			// Can't start pickup as long as movement is still ongoing
 			fmt.Println("Can't start attack since movement is still in progress")
 			return
