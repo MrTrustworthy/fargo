@@ -42,7 +42,7 @@ func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.Ba
 		if !ok {
 			return
 		}
-		if MovementIsCurrentlyProcessing(lss.World) {
+		if WorldIsCurrentlyBusy(lss.World) {
 			// Can't start pickup as long as movement is still ongoing
 			fmt.Println("Can't start attack since movement is still in progress")
 			return
