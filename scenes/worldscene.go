@@ -40,6 +40,9 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.UnitDeathSystem{})
 	world.AddSystem(&systems.LootManagementSystem{})
 
+	world.AddSystem(&systems.SimulationTestSystem{})
+
 	engo.Input.RegisterButton(systems.INPUT_CREATE_UNIT_KEY_BIND, engo.KeyC)
+	engo.Input.RegisterButton(systems.INPUT_RUN_TESTS_KEY_BIND, engo.KeyT)
 
 }
