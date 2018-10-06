@@ -11,13 +11,22 @@ const (
 	INPUT_CREATE_UNIT_KEY_BIND = "CreateUnit"
 )
 
+type MouseTracker struct {
+	ecs.BasicEntity
+	common.MouseComponent
+}
+
+func (mt *MouseTracker) toPoint() engo.Point {
+	return engo.Point{X: mt.MouseX, Y: mt.MouseY}
+}
+
 type InputSystem struct {
 	*ecs.World
-	events.MouseTracker
+	MouseTracker
 }
 
 func (is *InputSystem) New(world *ecs.World) {
-	is.MouseTracker = events.MouseTracker{
+	is.MouseTracker = MouseTracker{
 		BasicEntity:    ecs.NewBasic(),
 		MouseComponent: common.MouseComponent{Track: true},
 	}
@@ -29,17 +38,17 @@ func (is *InputSystem) Update(dt float32) {
 
 		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
 			events.Mailbox.Dispatch(events.InputSelectEvent{
-				MouseTracker: is.MouseTracker,
+				Point: is.MouseTracker.toPoint(),
 			})
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
 			events.Mailbox.Dispatch(events.InputInteractEvent{
-				MouseTracker: is.MouseTracker,
+				Point: is.MouseTracker.toPoint(),
 			})
 		}
 
 	} else if engo.Input.Button(INPUT_CREATE_UNIT_KEY_BIND).JustPressed() {
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{
-			Point: engo.Point{X: is.MouseTracker.MouseX, Y: is.MouseTracker.MouseY},
+			Point: is.MouseTracker.toPoint(),
 		})
 	}
 

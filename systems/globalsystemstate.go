@@ -2,9 +2,9 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"engo.io/engo/common"
 	"github.com/MrTrustworthy/fargo/entities"
-	"github.com/MrTrustworthy/fargo/events"
 )
 
 func AddToRenderSystem(world *ecs.World, renderable common.Renderable) {
@@ -43,7 +43,7 @@ func RemoveFromAnimationSystem(world *ecs.World, anim common.Animationable) {
 	}
 }
 
-func AddToMouseSystem(world *ecs.World, tracker *events.MouseTracker) {
+func AddToMouseSystem(world *ecs.World, tracker *MouseTracker) {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *common.MouseSystem:
@@ -109,12 +109,14 @@ func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
 	return GetUnitTrackingSystem(world).SelectedUnit
 }
 
-func FindUnitUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Unit, error) {
-	return GetUnitTrackingSystem(world).findUnitUnderMouse(tracker)
+func FindUnitUnderMouse(world *ecs.World, point engo.Point) (*entities.Unit, error) {
+	// TODO remove mouse tracker here too
+	return GetUnitTrackingSystem(world).findUnitUnderMouse(point)
 }
 
-func FindLootUnderMouse(world *ecs.World, tracker *events.MouseTracker) (*entities.Lootpack, error) {
-	return GetLootmanagementSystem(world).FindLootUnderMouse(tracker)
+func FindLootUnderMouse(world *ecs.World, point engo.Point) (*entities.Lootpack, error) {
+	// TODO remove mouse tracker here too
+	return GetLootmanagementSystem(world).FindLootUnderMouse(point)
 }
 
 func MovementIsCurrentlyProcessing(world *ecs.World) bool {

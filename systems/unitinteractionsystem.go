@@ -21,7 +21,7 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 			return
 		}
 		selectedUnit := GetCurrentlySelectedUnit(uis.World)
-		if clickedUnit, err := FindUnitUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
+		if clickedUnit, err := FindUnitUnderMouse(uis.World, imsg.Point); err == nil {
 			if clickedUnit == selectedUnit {
 				return
 			}
@@ -29,14 +29,14 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 			events.Mailbox.Dispatch(events.RequestAbilityUseEvent{
 				Ability: &selectedUnit.SelectedAbility,
 			})
-		} else if clickedLootpack, err := FindLootUnderMouse(uis.World, &imsg.MouseTracker); err == nil {
+		} else if clickedLootpack, err := FindLootUnderMouse(uis.World, imsg.Point); err == nil {
 			events.Mailbox.Dispatch(events.RequestLootPickupEvent{
 				Unit:     selectedUnit,
 				Lootpack: clickedLootpack,
 			})
 		} else {
 			// TODO remove the "dispatchXXX" calls here, also directly send event with selected unit
-			dispatchMoveTo(imsg.MouseX, imsg.MouseY, 0)
+			dispatchMoveTo(imsg.Point.X, imsg.Point.Y, 0)
 		}
 	}
 }

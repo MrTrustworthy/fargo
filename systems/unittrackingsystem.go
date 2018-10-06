@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -37,7 +38,7 @@ func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
 			events.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
 		}
 
-		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
+		if unit, err := ss.findUnitUnderMouse(imsg.Point); err == nil {
 			ss.SelectedUnit = unit
 			events.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
 		}
@@ -66,10 +67,10 @@ func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg events.BaseEvent
 
 func (ss *UnitTrackingSystem) Update(dt float32) {}
 
-func (ss *UnitTrackingSystem) findUnitUnderMouse(tracker *events.MouseTracker) (*entities.Unit, error) {
+func (ss *UnitTrackingSystem) findUnitUnderMouse(point engo.Point) (*entities.Unit, error) {
 	for _, unit := range ss.Units {
-		xDelta := tracker.MouseX - unit.GetSpaceComponent().Position.X
-		yDelta := tracker.MouseY - unit.GetSpaceComponent().Position.Y
+		xDelta := point.X - unit.GetSpaceComponent().Position.X
+		yDelta := point.Y - unit.GetSpaceComponent().Position.Y
 		if xDelta > 0 && xDelta < entities.UNITSIZE && yDelta > 0 && yDelta < entities.UNITSIZE {
 			return unit, nil
 		}
