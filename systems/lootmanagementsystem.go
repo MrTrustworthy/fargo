@@ -33,6 +33,7 @@ func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.Bas
 		lootpack := entities.NewLootpack(&udmsg.Point)
 		lss.ActiveLootPacks = append(lss.ActiveLootPacks, lootpack)
 		AddToRenderSystem(lss.World, lootpack)
+		events.Mailbox.Dispatch(events.LootHasSpawnedEvent{Lootpack: lootpack})
 	}
 }
 

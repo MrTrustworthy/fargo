@@ -29,12 +29,15 @@ func (mm *EventManager) Dispatch(message BaseEvent) {
 	CaptureChannel <- message
 
 	onceHandlers := mm.onceListeners[message.Type()]
-	for _, handler := range onceHandlers {
-		handler(message)
-	}
+	onceHandlerCopy := make([]EventHandler, len(onceHandlers))
+	copy(onceHandlerCopy, onceHandlers)
 	if mm.onceListeners != nil {
 		mm.onceListeners.clearKey(message.Type())
 	}
+	for _, handler := range onceHandlerCopy {
+		handler(message)
+	}
+
 
 	handlers := mm.listeners[message.Type()]
 	for _, handler := range handlers {
