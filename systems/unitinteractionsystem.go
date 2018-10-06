@@ -35,8 +35,11 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 				Lootpack: clickedLootpack,
 			})
 		} else {
-			// TODO remove the "dispatchXXX" calls here, also directly send event with selected unit
-			dispatchMoveTo(imsg.Point.X, imsg.Point.Y, 0)
+			events.Mailbox.Dispatch(events.MovementRequestEvent{
+				Target:         imsg.Point,
+				StopAtDistance: 0,
+				Unit:           selectedUnit,
+			})
 		}
 	}
 }

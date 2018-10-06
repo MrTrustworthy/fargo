@@ -149,11 +149,4 @@ func ShortenPathToStopDistance(plannedPath []engo.Point, target engo.Point, stop
 	return points
 }
 
-func dispatchMoveTo(x, y, dist float32) {
-	events.Mailbox.Dispatch(events.MovementRequestEvent{
-		Target:         engo.Point{X: x, Y: y},
-		StopAtDistance: dist,
-	})
-}
-
 func (ums *UnitMovementSystem) Remove(e ecs.BasicEntity) {}

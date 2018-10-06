@@ -68,7 +68,11 @@ func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 		events.Mailbox.Dispatch(*pickupEvent)
 	})
-	dispatchMoveTo(pickupEvent.Lootpack.Center().X, pickupEvent.Lootpack.Center().Y, LOOT_PICKUP_DISTANCE)
+	events.Mailbox.Dispatch(events.MovementRequestEvent{
+		Target:         pickupEvent.Lootpack.Center(),
+		StopAtDistance: LOOT_PICKUP_DISTANCE,
+		Unit:           pickupEvent.Unit,
+	})
 }
 
 func (lss *LootManagementSystem) FindLootUnderMouse(point engo.Point) (*entities.Lootpack, error) {

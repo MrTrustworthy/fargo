@@ -110,12 +110,10 @@ func GetCurrentlySelectedUnit(world *ecs.World) *entities.Unit {
 }
 
 func FindUnitUnderMouse(world *ecs.World, point engo.Point) (*entities.Unit, error) {
-	// TODO remove mouse tracker here too
 	return GetUnitTrackingSystem(world).findUnitUnderMouse(point)
 }
 
 func FindLootUnderMouse(world *ecs.World, point engo.Point) (*entities.Lootpack, error) {
-	// TODO remove mouse tracker here too
 	return GetLootmanagementSystem(world).FindLootUnderMouse(point)
 }
 

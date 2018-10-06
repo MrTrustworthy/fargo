@@ -70,7 +70,11 @@ func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 		events.Mailbox.Dispatch(raue)
 	})
-	dispatchMoveTo(target.Center().X, target.Center().Y, source.SelectedAbility.Maxrange())
+	events.Mailbox.Dispatch(events.MovementRequestEvent{
+		Target:         target.Center(),
+		StopAtDistance: source.SelectedAbility.Maxrange(),
+		Unit:           source,
+	})
 }
 
 func (uas *UnitAbilitySystem) Update(dt float32) {}
