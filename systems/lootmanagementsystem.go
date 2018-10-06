@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
@@ -67,13 +68,17 @@ func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 		events.Mailbox.Dispatch(*pickupEvent)
 	})
-	dispatchMoveTo(pickupEvent.Lootpack.Center().X, pickupEvent.Lootpack.Center().Y, LOOT_PICKUP_DISTANCE)
+	events.Mailbox.Dispatch(events.MovementRequestEvent{
+		Target:         pickupEvent.Lootpack.Center(),
+		StopAtDistance: LOOT_PICKUP_DISTANCE,
+		Unit:           pickupEvent.Unit,
+	})
 }
 
-func (lss *LootManagementSystem) FindLootUnderMouse(tracker *events.MouseTracker) (*entities.Lootpack, error) {
+func (lss *LootManagementSystem) FindLootUnderMouse(point engo.Point) (*entities.Lootpack, error) {
 	for _, pack := range lss.ActiveLootPacks {
-		xDelta := tracker.MouseX - pack.GetSpaceComponent().Position.X
-		yDelta := tracker.MouseY - pack.GetSpaceComponent().Position.Y
+		xDelta := point.X - pack.GetSpaceComponent().Position.X
+		yDelta := point.Y - pack.GetSpaceComponent().Position.Y
 		if xDelta > 0 && xDelta < entities.LOOTPACKSIZE && yDelta > 0 && yDelta < entities.LOOTPACKSIZE {
 			return pack, nil
 		}

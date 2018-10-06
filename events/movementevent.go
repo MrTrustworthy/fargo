@@ -35,8 +35,8 @@ func (me MovementStepEvent) AsLogMessage() string {
 
 type MovementRequestEvent struct {
 	Target         engo.Point
-	Action         string
 	StopAtDistance float32
+	Unit           *entities.Unit
 }
 
 func (rmte MovementRequestEvent) Type() string { return MOVEMENT_REQUESTMOVE_EVENT_NAME }

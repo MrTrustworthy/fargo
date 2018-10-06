@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -22,6 +23,8 @@ func (ss *UnitTrackingSystem) New(world *ecs.World) {
 	events.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
 	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
 	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
+	events.Mailbox.Listen(events.UNIT_REMOVAL_EVENT, ss.getHandleRemoveUnitEvent())
+
 }
 
 func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
@@ -37,7 +40,7 @@ func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
 			events.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
 		}
 
-		if unit, err := ss.findUnitUnderMouse(&imsg.MouseTracker); err == nil {
+		if unit, err := ss.findUnitUnderMouse(imsg.Point); err == nil {
 			ss.SelectedUnit = unit
 			events.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
 		}
@@ -64,12 +67,22 @@ func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg events.BaseEvent
 	}
 }
 
+func (ss *UnitTrackingSystem) getHandleRemoveUnitEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
+		smsg, ok := msg.(events.UnitRemovalEvent)
+		if !ok {
+			return
+		}
+		ss.removeUnit(smsg.Unit)
+	}
+}
+
 func (ss *UnitTrackingSystem) Update(dt float32) {}
 
-func (ss *UnitTrackingSystem) findUnitUnderMouse(tracker *events.MouseTracker) (*entities.Unit, error) {
+func (ss *UnitTrackingSystem) findUnitUnderMouse(point engo.Point) (*entities.Unit, error) {
 	for _, unit := range ss.Units {
-		xDelta := tracker.MouseX - unit.GetSpaceComponent().Position.X
-		yDelta := tracker.MouseY - unit.GetSpaceComponent().Position.Y
+		xDelta := point.X - unit.GetSpaceComponent().Position.X
+		yDelta := point.Y - unit.GetSpaceComponent().Position.Y
 		if xDelta > 0 && xDelta < entities.UNITSIZE && yDelta > 0 && yDelta < entities.UNITSIZE {
 			return unit, nil
 		}
@@ -77,7 +90,7 @@ func (ss *UnitTrackingSystem) findUnitUnderMouse(tracker *events.MouseTracker) (
 	return nil, errors.New("No unit Found")
 }
 
-func (ss *UnitTrackingSystem) RemoveUnit(unit *entities.Unit) {
+func (ss *UnitTrackingSystem) removeUnit(unit *entities.Unit) {
 	index := -1
 	for i, val := range ss.Units {
 		if val == unit {
