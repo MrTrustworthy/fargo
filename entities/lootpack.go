@@ -25,7 +25,6 @@ func NewLootpack(point *engo.Point) *Lootpack {
 	lootpack := &Lootpack{
 		BasicEntity: ecs.NewBasic(),
 		SpaceComponent: common.SpaceComponent{
-			Position: *point,
 			Width:    LOOTPACKSIZE,
 			Height:   LOOTPACKSIZE,
 		},
@@ -35,6 +34,7 @@ func NewLootpack(point *engo.Point) *Lootpack {
 		},
 		Inventory: NewSampleInventory(),
 	}
+	lootpack.SetCenter(*point)
 
 	return lootpack
 }
