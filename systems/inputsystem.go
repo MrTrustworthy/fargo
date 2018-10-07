@@ -10,6 +10,8 @@ import (
 const (
 	INPUT_CREATE_UNIT_KEY_BIND = "CreateUnit"
 	INPUT_RUN_TESTS_KEY_BIND   = "RunTests"
+	INPUT_SHOW_DIALOG          = "ShowDialog"
+	INPUT_HIDE_DIALOG          = "HideDialog"
 )
 
 type MouseTracker struct {
@@ -51,6 +53,10 @@ func (is *InputSystem) Update(dt float32) {
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: is.MouseTracker.toPoint()})
 	} else if engo.Input.Button(INPUT_RUN_TESTS_KEY_BIND).JustPressed() {
 		events.Mailbox.Dispatch(events.TestBasicAttackEvent{})
+	} else if engo.Input.Button(INPUT_SHOW_DIALOG).JustPressed() {
+		events.Mailbox.Dispatch(events.DialogShowEvent{})
+	}else if engo.Input.Button(INPUT_HIDE_DIALOG).JustPressed() {
+		events.Mailbox.Dispatch(events.DialogHideEvent{})
 	}
 
 }
