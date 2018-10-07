@@ -5,6 +5,7 @@ import (
 	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
+	"strconv"
 )
 
 type SimulationTestSystem struct {
@@ -38,6 +39,7 @@ func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg events.Ba
 		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB})
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+			AssertAbilitySuccessful(msg,true)
 			Assert(unitA.AP == unitB.AP-unitA.SelectedAbility.Cost()-1, "Unit A should have lost different amount of AP")
 			Assert(unitB.Health == unitA.Health-unitA.SelectedAbility.Damage(), "Unit B should have lost Health")
 			centerA, centerB := unitA.Center(), unitB.Center()
@@ -68,8 +70,10 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // First attack
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+			AssertAbilitySuccessful(msg,true)
 			fmt.Println("Test 2: First Attack Completed")
 			events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+				AssertAbilitySuccessful(msg,true)
 				fmt.Println("Test 2: Second Attack Completed")
 				events.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg events.BaseEvent) {
 					fmt.Println("Test 2: Third Attack, Unit Death and Loot Spawn Completed")
@@ -156,7 +160,8 @@ func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg events.Base
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB})
 
-		events.Mailbox.ListenOnce(events.ABILITY_ABORT_EVENT_NAME, func(msg events.BaseEvent) {
+		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+			AssertAbilitySuccessful(msg, false)
 			fmt.Println("Test 4: getHandleNoAPAttackEvent passed")
 			events.Mailbox.Dispatch(events.TestLootTooFarEvent{})
 		})
@@ -183,8 +188,10 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // First attack
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+			AssertAbilitySuccessful(msg,true)
 			fmt.Println("Test 5: First Attack Completed")
 			events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+				AssertAbilitySuccessful(msg,true)
 				fmt.Println("Test 5: Second Attack Completed")
 				events.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg events.BaseEvent) {
 					fmt.Println("Test 5: Third Attack, Unit Death and Loot Spawn Completed")
@@ -210,6 +217,11 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 	}
 }
 
+func AssertAbilitySuccessful(msg events.BaseEvent, success bool) {
+	if lmsg, ok := msg.(events.AbilityCompletedEvent); ok {
+		Assert(lmsg.Successful == success, "Ability should have completed with success:" + strconv.FormatBool(success))
+	}
+}
 
 func Assert(testable bool, message string) {
 	if !testable {

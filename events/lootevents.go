@@ -52,9 +52,9 @@ type LootPickupCompletedEvent struct {
 func (se LootPickupCompletedEvent) Type() string { return LOOT_PICKUP_COMPLETED_EVENT }
 
 func (se LootPickupCompletedEvent) AsLogMessage() string {
-	s := "Aborted"
+	s := "with a failure"
 	if se.Successful {
-		s = "Successful"
+		s = "Successfully"
 	}
 	return "Loot pickup completed " + s
 }
