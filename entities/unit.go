@@ -15,13 +15,14 @@ type UnitAttributes struct {
 }
 
 type Unit struct {
-	UnitAttributes
 	ecs.BasicEntity
 	common.SpaceComponent
 	common.RenderComponent
 	common.AnimationComponent
 	SelectedAbility Ability
-	*Inventory
+	UnitAttributes
+	Inventory  *Inventory
+	HitboxSize int
 }
 
 const UNITSIZE = 64
@@ -63,7 +64,8 @@ func NewUnit() *Unit {
 			Health: 10,
 			AP:     7,
 		},
-		Inventory: NewSampleInventory(),
+		Inventory:  NewSampleInventory(),
+		HitboxSize: UNITSIZE,
 	}
 	unit.RenderComponent.SetZIndex(50)
 

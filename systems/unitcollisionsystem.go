@@ -2,7 +2,6 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"engo.io/engo/common"
 	"github.com/MrTrustworthy/fargo/events"
 )
 
@@ -15,6 +14,9 @@ func (ucs *UnitCollisionSystem) New(world *ecs.World) {
 	events.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
 }
 
+// The collision systems works as follows: Each step of a movement, the moving unit is checked against all other units.
+// If a collision is detected, a CollisionEvent is sent. In that case, the MovementSystem is responsible for handling
+// the collision by cancelling the movement and resetting the unit to its last known good position.
 func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
 		mmsg, ok := msg.(events.MovementStepEvent)
@@ -22,7 +24,7 @@ func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEve
 			return
 		}
 
-		unitHitbox := mmsg.Unit.SpaceComponent.AABB()
+		unitPosition := mmsg.Unit.Center()
 
 		for _, other := range GetAllExistingUnits(ucs.world) {
 			// exclude collisions with the unit itself
@@ -30,10 +32,13 @@ func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEve
 				continue
 			}
 
-			otherHitbox := other.SpaceComponent.AABB()
-			if !common.IsIntersecting(unitHitbox, otherHitbox) {
+			otherPosition := other.Center()
+			distance := unitPosition.PointDistance(otherPosition)
+			collisionDistance := (float32(mmsg.Unit.HitboxSize) / 2.0) + (float32(other.HitboxSize) / 2.0)
+			if distance > collisionDistance {
 				continue
 			}
+
 			events.Mailbox.Dispatch(events.CollisionEvent{
 				ActiveUnit:  mmsg.Unit,
 				PassiveUnit: other,

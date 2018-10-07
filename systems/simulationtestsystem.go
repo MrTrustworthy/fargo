@@ -86,7 +86,7 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 					})
 
 					events.Mailbox.Dispatch(events.RequestLootPickupEvent{ // Loot pickup request
-						Unit: unitA,
+						Unit:     unitA,
 						Lootpack: lootMsg.Lootpack,
 					})
 				})
@@ -117,8 +117,17 @@ func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg events.BaseE
 
 		events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			centerA, centerB := unitA.Center(), unitB.Center()
-			Assert(centerA.PointDistance(centerB) <= 70, "Unit A should be stuck")
-			fmt.Println("Test 3: getHandleCollisionEvent passed")
+			distance := centerA.PointDistance(centerB)
+			Assert(distance < 70 && distance >= 64, "Unit A should be stuck")
+			fmt.Println("Test 3: Unit is stuck now")
+
+			// now that we're stuck, let's try to move back to the origin
+			events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+				Assert(unitA.Center() == posA, "Unit A should have made it back to its origin")
+				fmt.Println("Test 3: getHandleCollisionEvent passed")
+			})
+			events.Mailbox.Dispatch(events.InputInteractEvent{Point: posA})
+
 		})
 
 	}
