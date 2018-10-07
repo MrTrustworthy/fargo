@@ -77,30 +77,20 @@ func GetUnitTrackingSystem(world *ecs.World) *UnitTrackingSystem {
 	return nil
 }
 
-func GetUnitMovementSystem(world *ecs.World) *UnitMovementSystem {
-	for _, system := range world.Systems() {
-		switch sys := system.(type) {
-		case *UnitMovementSystem:
-			return sys
-		}
-	}
-	return nil
-}
-
-func GetUnitAbilitySystem(world *ecs.World) *UnitAbilitySystem {
-	for _, system := range world.Systems() {
-		switch sys := system.(type) {
-		case *UnitAbilitySystem:
-			return sys
-		}
-	}
-	return nil
-}
-
 func GetLootmanagementSystem(world *ecs.World) *LootManagementSystem {
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *LootManagementSystem:
+			return sys
+		}
+	}
+	return nil
+}
+
+func GetDialogSystem(world *ecs.World) *DialogSystem {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *DialogSystem:
 			return sys
 		}
 	}
@@ -121,6 +111,10 @@ func FindUnitUnderMouse(world *ecs.World, point engo.Point) (*entities.Unit, err
 
 func FindLootUnderMouse(world *ecs.World, point engo.Point) (*entities.Lootpack, error) {
 	return GetLootmanagementSystem(world).FindLootUnderMouse(point)
+}
+
+func IsDialogUnderMouse(world *ecs.World, point engo.Point) bool {
+	return GetDialogSystem(world).HasDialogAtPosition(point)
 }
 
 func WorldIsCurrentlyBusy(world *ecs.World) bool {
