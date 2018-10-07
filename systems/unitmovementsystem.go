@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
+	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -18,6 +19,7 @@ type UnitMovementSystem struct {
 
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
+	// Constraint: For EVERY requestmove, there MUST be a MovementCompleted Event! Else other systems might wait for ever
 	events.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
 	events.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
 
@@ -53,7 +55,7 @@ func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg events.BaseEve
 			panic("Collision causing movement abort, but there is no moving unit!" + cmsg.AsLogMessage())
 		}
 		ums.ResetToLastPosition()
-		ums.StopMovement()
+		ums.StopMovement(false)
 	}
 }
 
@@ -76,6 +78,12 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	if ums.IsIdle() {
 		return
 	}
+
+	if err := ums.SubtractAPForMovement(); err != nil {
+		ums.StopMovement(false)
+		return
+	}
+
 	nextPos := ums.CurrentPath[0]
 	ums.CurrentPath = ums.CurrentPath[1:]
 	ums.LastPosition = ums.CurrentUnit.Position
@@ -85,8 +93,24 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	if len(ums.CurrentPath) > 0 {
 		events.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
 	} else {
-		ums.StopMovement()
+		ums.StopMovement(true)
 	}
+}
+
+func (ums *UnitMovementSystem) SubtractAPForMovement() error {
+	if ums.CurrentUnit.UnitAttributes.StepsLeftForAP != 0 {
+		ums.CurrentUnit.UnitAttributes.StepsLeftForAP--
+		return nil
+	}
+
+	if ums.CurrentUnit.UnitAttributes.AP != 0 {
+		ums.CurrentUnit.UnitAttributes.AP--
+		ums.CurrentUnit.StepsLeftForAP = int(ums.CurrentUnit.UnitAttributes.Speed * 10)
+		events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ums.CurrentUnit})
+		return nil
+	}
+
+	return errors.New("can't move further, no Steps or AP left")
 }
 
 func (ums *UnitMovementSystem) ResetToLastPosition() {
@@ -98,7 +122,7 @@ func (ums *UnitMovementSystem) IsIdle() bool {
 	return ums.CurrentTarget == engo.Point{} && ums.CurrentUnit == nil && ums.CurrentPath == nil && ums.LastPosition == engo.Point{}
 }
 
-func (ums *UnitMovementSystem) StopMovement() {
+func (ums *UnitMovementSystem) StopMovement(successful bool) {
 	if ums.IsIdle() {
 		panic("Attempting to stop movemement, but there is no moving unit!")
 	}
@@ -108,7 +132,7 @@ func (ums *UnitMovementSystem) StopMovement() {
 	ums.CurrentPath = nil
 	ums.LastPosition = engo.Point{}
 	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	events.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit})
+	events.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit, Successful: successful})
 }
 
 func InterpolateBetween(a, b engo.Point, stepSize float32) []engo.Point {

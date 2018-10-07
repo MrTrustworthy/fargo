@@ -46,7 +46,7 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent) {
 	ability := *raue.Ability
 	if !ability.CanExecute() {
-		events.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: &ability})
+		events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: false})
 		return
 	}
 	uas.executingAbility = ability
@@ -57,7 +57,11 @@ func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
-		events.Mailbox.Dispatch(*raue)
+		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
+			events.Mailbox.Dispatch(*raue)
+		} else {
+			events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: raue.Ability, Successful: false})
+		}
 	})
 	events.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         target.Center(),
@@ -94,7 +98,7 @@ func (uas *UnitAbilitySystem) Update(dt float32) {
 		})
 	}
 	uas.executingAbility = nil
-	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability})
+	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: true})
 }
 
 func (uas *UnitAbilitySystem) IsIdle() bool {

@@ -63,11 +63,16 @@ func (lss *LootManagementSystem) executePickup(pickupEvent *events.RequestLootPi
 	pickupEvent.Unit.Inventory.FillFrom(*pickupEvent.Lootpack.Inventory)
 	lss.RemoveLootbox(pickupEvent.Lootpack)
 	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: pickupEvent.Unit})
+	events.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: true})
 }
 
 func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
-		events.Mailbox.Dispatch(*pickupEvent)
+		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
+			events.Mailbox.Dispatch(*pickupEvent)
+		} else {
+			events.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: false})
+		}
 	})
 	events.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         pickupEvent.Lootpack.Center(),

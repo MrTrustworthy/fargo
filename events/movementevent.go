@@ -13,13 +13,18 @@ const (
 
 type MovementCompletedEvent struct {
 	*entities.Unit
+	Successful bool
 }
 
 func (me MovementCompletedEvent) Type() string { return MOVEMENT_COMPLETED_EVENT_NAME }
 
 func (me MovementCompletedEvent) AsLogMessage() string {
 	x, y := PointToXYStrings(me.Unit.SpaceComponent.Center())
-	return "for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
+	s := "Aborted"
+	if me.Successful {
+		s = "Successful"
+	}
+	return s + " for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
 }
 
 type MovementStepEvent struct {
