@@ -29,6 +29,7 @@ type InputSystem struct {
 }
 
 func (is *InputSystem) New(world *ecs.World) {
+	is.World = world
 	is.MouseTracker = MouseTracker{
 		BasicEntity:    ecs.NewBasic(),
 		MouseComponent: common.MouseComponent{Track: true},
@@ -38,8 +39,9 @@ func (is *InputSystem) New(world *ecs.World) {
 
 func (is *InputSystem) Update(dt float32) {
 	if engo.Input.Mouse.Action == engo.Press {
-
-		if engo.Input.Mouse.Button == engo.MouseButtonLeft {
+		if IsDialogUnderMouse(is.World, is.MouseTracker.toPoint()) {
+			events.Mailbox.Dispatch(events.DialogClickEvent{})
+		} else if engo.Input.Mouse.Button == engo.MouseButtonLeft {
 			events.Mailbox.Dispatch(events.InputSelectEvent{
 				Point: is.MouseTracker.toPoint(),
 			})
@@ -55,7 +57,7 @@ func (is *InputSystem) Update(dt float32) {
 		events.Mailbox.Dispatch(events.TestBasicAttackEvent{})
 	} else if engo.Input.Button(INPUT_SHOW_DIALOG).JustPressed() {
 		events.Mailbox.Dispatch(events.DialogShowEvent{})
-	}else if engo.Input.Button(INPUT_HIDE_DIALOG).JustPressed() {
+	} else if engo.Input.Button(INPUT_HIDE_DIALOG).JustPressed() {
 		events.Mailbox.Dispatch(events.DialogHideEvent{})
 	}
 

@@ -4,19 +4,22 @@ package systems
 
 import (
 	"engo.io/ecs"
-	"github.com/MrTrustworthy/fargo/entities"
+	"engo.io/engo"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/ui"
 )
 
 type DialogSystem struct {
 	world *ecs.World
-	currentDialog *entities.Dialog
+	currentDialog *ui.Dialog
 }
 
 func (ds *DialogSystem) New(world *ecs.World) {
 	ds.world = world
 	events.Mailbox.Listen(events.DIALOG_SHOW_EVENT, ds.getHandleShowDialog())
 	events.Mailbox.Listen(events.DIALOG_HIDE_EVENT, ds.getHandleHideDialog())
+	events.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
 }
 
 func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
@@ -25,7 +28,7 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 		if !ok {
 			return
 		}
-		ds.currentDialog = entities.NewDialog()
+		ds.currentDialog = ui.NewDialog()
 		ds.ShowCurrentDialog()
 	}
 }
@@ -39,6 +42,21 @@ func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
 		ds.HideCurrentDialog()
 		ds.currentDialog = nil
 	}
+}
+
+func (ds *DialogSystem) getHandleDialogClick() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
+		_, ok := msg.(events.DialogClickEvent)
+		if !ok {
+			return
+		}
+		fmt.Println("CLICKED DIALOG")
+	}
+}
+
+func (ds *DialogSystem) HasDialogAtPosition(point engo.Point) bool {
+	// TODO does this work when the camera has moved and the mouse & window positions no longer match up?
+	return ds.currentDialog != nil && ds.currentDialog.Background.SpaceComponent.Contains(point)
 }
 
 func (ds *DialogSystem) ShowCurrentDialog() {

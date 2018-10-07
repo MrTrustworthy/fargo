@@ -1,4 +1,4 @@
-package entities
+package ui
 
 import (
 	"engo.io/ecs"
@@ -9,13 +9,17 @@ import (
 )
 
 type Dialog struct {
+	Background *DialogBackground
 	Elements []common.Renderable
 }
 
 func NewDialog() *Dialog {
 	dialogPosition := engo.AABB{Min: engo.Point{X: 100, Y: 100}, Max: engo.Point{X: 400, Y: 400}}
-	d := Dialog{}
-	d.Elements = append(d.Elements, NewDialogBackground(dialogPosition))
+	bg := NewDialogBackground(dialogPosition)
+	d := Dialog{
+		Background: bg,
+	}
+	d.Elements = append(d.Elements, bg)
 	return &d
 }
 
