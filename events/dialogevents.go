@@ -1,16 +1,18 @@
 package events
 
+import "engo.io/engo"
+
 const (
-	DIALOG_SHOW_EVENT = "DialogShowEvent"
-	DIALOG_HIDE_EVENT = "DialogHideEvent"
-	DIALOG_CLICK_EVENT = "DialogClickEvent"
+	DIALOG_SHOW_INVENTORY_EVENT = "DialogShowInventoryEvent"
+	DIALOG_HIDE_EVENT           = "DialogHideEvent"
+	DIALOG_CLICK_EVENT          = "DialogClickEvent"
 )
 
-type DialogShowEvent struct {}
+type DialogShowInventoryEvent struct {}
 
-func (ce DialogShowEvent) Type() string { return DIALOG_SHOW_EVENT }
+func (ce DialogShowInventoryEvent) Type() string { return DIALOG_SHOW_INVENTORY_EVENT }
 
-func (ce DialogShowEvent) AsLogMessage() string {
+func (ce DialogShowInventoryEvent) AsLogMessage() string {
 	return "Showing dialog"
 }
 
@@ -22,7 +24,9 @@ func (ce DialogHideEvent) AsLogMessage() string {
 	return "Hiding dialog"
 }
 
-type DialogClickEvent struct {}
+type DialogClickEvent struct {
+	engo.Point
+}
 
 func (ce DialogClickEvent) Type() string { return DIALOG_CLICK_EVENT }
 

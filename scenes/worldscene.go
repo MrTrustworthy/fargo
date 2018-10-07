@@ -45,7 +45,7 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 
 	engo.Input.RegisterButton(systems.INPUT_CREATE_UNIT_KEY_BIND, engo.KeyC)
 	engo.Input.RegisterButton(systems.INPUT_RUN_TESTS_KEY_BIND, engo.KeyT)
-	engo.Input.RegisterButton(systems.INPUT_SHOW_DIALOG, engo.KeyF)
+	engo.Input.RegisterButton(systems.INPUT_SHOW_INVENTORY_DIALOG, engo.KeyF)
 	engo.Input.RegisterButton(systems.INPUT_HIDE_DIALOG, engo.KeyG)
 
 }
