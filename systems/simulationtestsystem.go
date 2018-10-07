@@ -15,6 +15,7 @@ func (sts *SimulationTestSystem) New(world *ecs.World) {
 	sts.World = world
 	events.Mailbox.Listen(events.TEST_SIMPLE_ATTACK, sts.getHandleSimpleAttackEvent())
 	events.Mailbox.Listen(events.TEST_KILL_AND_LOOT, sts.getHandleKillAndLootEvent())
+	events.Mailbox.Listen(events.TEST_COLLISON_EVENT, sts.getHandleCollisionEvent())
 
 }
 
@@ -24,7 +25,7 @@ func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg events.Ba
 			return
 		}
 
-		posA, posB := engo.Point{X: 100, Y: 100}, engo.Point{X: 600, Y: 100}
+		posA, posB := engo.Point{X: 200, Y: 100}, engo.Point{X: 500, Y: 100}
 
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posA})
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posB})
@@ -55,13 +56,12 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 			return
 		}
 
-		posA, posB := engo.Point{X: 100, Y: 300}, engo.Point{X: 600, Y: 300}
+		posA, posB := engo.Point{X: 200, Y: 250}, engo.Point{X: 500, Y: 250}
 
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posA})
 		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posB})
 
 		unitA, _ := FindUnitUnderMouse(sts.World, posA)
-		//unitB, _ := FindUnitUnderMouse(sts.World, posB)
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // First attack
@@ -82,6 +82,7 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 						Assert(unitA.AP == 1, "Should have only 1 AP left")
 						Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
 						fmt.Println("Test 2: getHandleKillAndLootEvent passed")
+						events.Mailbox.Dispatch(events.TestCollisionEvent{})
 					})
 
 					events.Mailbox.Dispatch(events.RequestLootPickupEvent{ // Loot pickup request
@@ -92,6 +93,32 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 				events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Third Attack
 			})
 			events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Second attack
+		})
+
+	}
+}
+
+func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
+		if _, ok := msg.(events.TestCollisionEvent); !ok {
+			return
+		}
+
+		posA, posB, goal := engo.Point{X: 200, Y: 400}, engo.Point{X: 500, Y: 400}, engo.Point{X: 800, Y: 400}
+
+		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posA})
+		events.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posB})
+
+		unitA, _ := FindUnitUnderMouse(sts.World, posA)
+		unitB, _ := FindUnitUnderMouse(sts.World, posB)
+
+		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
+		events.Mailbox.Dispatch(events.InputInteractEvent{Point: goal})
+
+		events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+			centerA, centerB := unitA.Center(), unitB.Center()
+			Assert(centerA.PointDistance(centerB) <= 70, "Unit A should be stuck")
+			fmt.Println("Test 3: getHandleCollisionEvent passed")
 		})
 
 	}
