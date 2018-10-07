@@ -76,8 +76,11 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
 					lootPos := lootMsg.Lootpack.SpaceComponent.Center()
 
-					events.Mailbox.ListenOnce(events.UNIT_ATTRIBUTE_CHANGE_EVENT, func(msg events.BaseEvent) {
+					events.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg events.BaseEvent) {
 						fmt.Println("Test 2: Loot picked up")
+						if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
+							Assert(lmsg.Successful, "Loot pickup should have been successful")
+						}
 						centerA := unitA.Center()
 						Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
 						Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
@@ -186,14 +189,11 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 				events.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg events.BaseEvent) {
 					fmt.Println("Test 5: Third Attack, Unit Death and Loot Spawn Completed")
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
-					lootPos := lootMsg.Lootpack.SpaceComponent.Center()
 
-					events.Mailbox.ListenOnce(events.UNIT_ATTRIBUTE_CHANGE_EVENT, func(msg events.BaseEvent) {
-						fmt.Println("Test 5: Loot picked up")
-						centerA := unitA.Center()
-						Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
-						Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
-						Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
+					events.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg events.BaseEvent) {
+						if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
+							Assert(!lmsg.Successful, "Loot pickup should have failed")
+						}
 						fmt.Println("Test 5: getHandleKillAndLootEvent passed")
 					})
 
