@@ -29,7 +29,7 @@ type MovementStepEvent struct {
 func (me MovementStepEvent) Type() string { return MOVEMENT_STEP_EVENT_NAME }
 
 func (me MovementStepEvent) AsLogMessage() string {
-	x, y := PointToXYStrings(me.Unit.SpaceComponent.Position)
+	x, y := PointToXYStrings(me.Unit.SpaceComponent.Center())
 	return "for unit " + me.Unit.Name + " at (" + x + ":" + y + ")"
 }
 
