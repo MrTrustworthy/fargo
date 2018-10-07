@@ -57,7 +57,11 @@ func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
 	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
-		events.Mailbox.Dispatch(*raue)
+		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
+			events.Mailbox.Dispatch(*raue)
+		} else {
+			events.Mailbox.Dispatch(events.AbilityAbortedEvent{Ability: raue.Ability})
+		}
 	})
 	events.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         target.Center(),
