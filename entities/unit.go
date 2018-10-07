@@ -8,10 +8,11 @@ import (
 )
 
 type UnitAttributes struct {
-	Name   string
-	Speed  float32
-	Health int
-	AP     int
+	Name           string
+	Speed          float32
+	Health         int
+	AP             int
+	StepsLeftForAP int  // TODO: once we implement turns, we need to remember to reset this to 0 at the end of a turn
 }
 
 type Unit struct {

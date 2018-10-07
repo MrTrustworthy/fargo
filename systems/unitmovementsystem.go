@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
+	"errors"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -76,6 +77,12 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	if ums.IsIdle() {
 		return
 	}
+
+	if err := ums.SubtractAPForMovement(); err != nil {
+		ums.StopMovement()
+		return
+	}
+
 	nextPos := ums.CurrentPath[0]
 	ums.CurrentPath = ums.CurrentPath[1:]
 	ums.LastPosition = ums.CurrentUnit.Position
@@ -87,6 +94,22 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 	} else {
 		ums.StopMovement()
 	}
+}
+
+func (ums *UnitMovementSystem) SubtractAPForMovement() error {
+	if ums.CurrentUnit.UnitAttributes.StepsLeftForAP != 0 {
+		ums.CurrentUnit.UnitAttributes.StepsLeftForAP--
+		return nil
+	}
+
+	if ums.CurrentUnit.UnitAttributes.AP != 0 {
+		ums.CurrentUnit.UnitAttributes.AP--
+		ums.CurrentUnit.StepsLeftForAP = int(ums.CurrentUnit.UnitAttributes.Speed * 10)
+		events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ums.CurrentUnit})
+		return nil
+	}
+
+	return errors.New("can't move further, no Steps or AP left")
 }
 
 func (ums *UnitMovementSystem) ResetToLastPosition() {
