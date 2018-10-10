@@ -35,7 +35,7 @@ func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg events.BaseE
 			fmt.Println("Can't start new movement until old one is finished")
 			return
 		}
-
+		// TODO this should come from the movementrequestevent
 		unit := GetCurrentlySelectedUnit(ums.world)
 		if unit == nil {
 			panic("This shouldn't happen: No unit is selected, can't perform a movement!")
