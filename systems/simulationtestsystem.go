@@ -230,17 +230,6 @@ func Assert(testable bool, message string) {
 	}
 }
 
-func (sts *SimulationTestSystem) Update(dt float32) {
-
-	// really bad fix for mojave issue described in https://github.com/faiface/pixel/issues/140
-	if sts.updateDone {
-		return
-	}
-
-	window := engo.GetWindow()
-	x, y := window.GetPos()
-	window.SetPos(x, y+1)
-	sts.updateDone = true
-}
+func (sts *SimulationTestSystem) Update(dt float32) {}
 
 func (sts *SimulationTestSystem) Remove(e ecs.BasicEntity) {}
