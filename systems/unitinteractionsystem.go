@@ -21,6 +21,12 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 			return
 		}
 		selectedUnit := GetCurrentlySelectedUnit(uis.World)
+
+		if selectedUnit == nil {
+			// there is nothing to do for this system when we don't have a selected unit
+			return
+		}
+
 		if clickedUnit, err := FindUnitUnderMouse(uis.World, imsg.Point); err == nil {
 			if clickedUnit == selectedUnit {
 				return
