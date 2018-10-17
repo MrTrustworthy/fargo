@@ -30,7 +30,7 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg events.BaseEvent
 		if !ok {
 			return
 		}
-		uis.SelectText.SetTextForUnit(imsg.Unit)
+		uis.SelectText.SetDisplayeddUnit(imsg.Unit)
 	}
 }
 
@@ -50,10 +50,7 @@ func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg events.
 		if !ok {
 			return
 		}
-		if imsg.Unit != GetCurrentlySelectedUnit(uis.World) {
-			return
-		}
-		uis.SelectText.SetTextForUnit(imsg.Unit)
+		uis.SelectText.UpdateTextForUnitIfDisplayed(imsg.Unit)
 	}
 }
 

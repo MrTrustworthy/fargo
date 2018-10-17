@@ -13,6 +13,7 @@ type HUDText struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
+	*Unit
 }
 
 func NewHUDText() *HUDText {
@@ -48,7 +49,16 @@ func NewHUDText() *HUDText {
 	return &hudText
 }
 
-func (ht *HUDText) SetTextForUnit(unit *Unit) {
+func (ht *HUDText) SetDisplayeddUnit(unit *Unit) {
+	ht.Unit = unit
+	ht.UpdateTextForUnitIfDisplayed(unit)
+}
+
+func (ht *HUDText) UpdateTextForUnitIfDisplayed(unit *Unit) {
+	if unit != ht.Unit {
+		// No reason to update hud text for unit that's not currently selected
+		return
+	}
 	unitText := "Unit: " + unit.Name + "\nSelected Attack: " + unit.SelectedAbility.Name() + "\nSpeed:" +
 		strconv.Itoa(int(unit.Speed)) + " HP: " + strconv.Itoa(unit.Health) + " AP: " + strconv.Itoa(unit.AP) + " | " +
 		unit.Inventory.String()
