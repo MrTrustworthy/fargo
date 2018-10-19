@@ -1,53 +1,28 @@
 package ui
 
 import (
-	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
-	"image/color"
+	"fmt"
+	"github.com/MrTrustworthy/fargo/entities"
+	"strconv"
 )
 
-func NewInventoryDialog() *Dialog {
+func NewInventoryDialog(inventory *entities.Inventory) *Dialog {
 	dialogPosition := engo.AABB{Min: engo.Point{X: 100, Y: 100}, Max: engo.Point{X: 400, Y: 400}}
-	btnPosition := engo.AABB{Min: engo.Point{X: 120, Y: 120}, Max: engo.Point{X: 380, Y: 220}}
+	d := NewDialog(dialogPosition)
 
-	bg := NewDialogBackground(dialogPosition)
-	btn := NewInventoryButton(btnPosition, "Hello")
-	d := Dialog{
-		Background: bg,
-	}
-	d.Elements = append(d.Elements, bg, btn)
-	return &d
-}
+	offset := 0
+	for item, amount := range *inventory {
 
-func NewInventoryButton(outline engo.AABB, text string) *Button {
-	height, width := outline.Max.X-outline.Min.X, outline.Max.Y-outline.Min.Y
-
-	button := Button{BasicEntity: ecs.NewBasic()}
-	button.SpaceComponent = common.SpaceComponent{
-		Position: outline.Min,
-		Width:    height,
-		Height:   width,
+		btnPosition := engo.AABB{
+			Min: engo.Point{X: 120, Y: float32(120+offset)},
+			Max: engo.Point{X: 380, Y: float32(220+offset)},
+		}
+		btn := NewButton(btnPosition, item.Name + ": " + strconv.Itoa(amount), func(btn *Button) { fmt.Println("Clicked on " + item.Name) })
+		d.AddElement(btn)
+		offset += 20
 	}
 
-	fnt := &common.Font{
-		URL:  "fonts/Roboto-Regular.ttf",
-		FG:   color.Black,
-		Size: 16,
-	}
-	err := fnt.CreatePreloaded()
-	if err != nil {
-		panic(err)
-	}
 
-	button.RenderComponent = common.RenderComponent{
-		Drawable: common.Text{
-			Font: fnt,
-			Text: "##",
-		},
-	}
-	button.RenderComponent.SetShader(common.HUDShader)
-	button.RenderComponent.SetZIndex(201)
-	button.SetText(text)
-	return &button
+	return d
 }

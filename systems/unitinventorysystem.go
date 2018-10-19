@@ -22,7 +22,7 @@ func (is *UnitInventorySystem) getHandleShowInventory() func(msg events.BaseEven
 		if !ok || simsg.Unit == nil {
 			return
 		}
-		inventoryDialog := ui.NewInventoryDialog()
+		inventoryDialog := ui.NewInventoryDialog(simsg.Unit.Inventory)
 		events.Mailbox.Dispatch(events.DialogShowEvent{Dialog: inventoryDialog})
 
 	}

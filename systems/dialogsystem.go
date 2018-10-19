@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/ui"
 )
@@ -49,10 +48,8 @@ func (ds *DialogSystem) getHandleDialogClick() func(msg events.BaseEvent) {
 			return
 		}
 
-		fmt.Println("CLICKED DIALOG")
-
 		for _, elem := range ds.currentDialog.Elements {
-			if clicker, ok := elem.(ui.Clicker); ok && elem.GetSpaceComponent().Contains(dce.Point){
+			if clicker, ok := elem.(ui.Clicker); ok && elem.GetSpaceComponent().Contains(dce.Point) {
 				clicker.HandleClick()
 				return
 			}
