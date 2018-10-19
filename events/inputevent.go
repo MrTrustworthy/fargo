@@ -2,6 +2,7 @@ package events
 
 import (
 	"engo.io/engo"
+	"github.com/MrTrustworthy/fargo/entities"
 )
 
 const (
@@ -10,7 +11,6 @@ const (
 	INPUT_CREATEUNIT_EVENT_NAME = "InputCreateunitEvent"
 )
 
-// TODO remove mouse tracker, replace with point
 type InputSelectEvent struct {
 	engo.Point
 }
@@ -20,9 +20,9 @@ func (ie InputSelectEvent) AsLogMessage() string {
 	return getInputEventLogMessage(ie.Point)
 }
 
-// TODO remove mouse tracker, replace with point
 type InputInteractEvent struct {
 	engo.Point
+	*entities.Unit
 }
 
 func (ie InputInteractEvent) Type() string { return INPUT_INTERACT_EVENT_NAME }

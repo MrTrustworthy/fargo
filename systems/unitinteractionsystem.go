@@ -20,8 +20,7 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 		if !ok {
 			return
 		}
-		selectedUnit := GetCurrentlySelectedUnit(uis.World)
-
+		selectedUnit := imsg.Unit
 		if selectedUnit == nil {
 			// there is nothing to do for this system when we don't have a selected unit
 			return

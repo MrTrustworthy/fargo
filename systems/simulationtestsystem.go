@@ -37,7 +37,7 @@ func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg events.Ba
 		unitB, _ := FindUnitUnderMouse(sts.World, posB)
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
-		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB})
+		events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB})
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			AssertAbilitySuccessful(msg,true)
@@ -68,7 +68,7 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 		unitA, _ := FindUnitUnderMouse(sts.World, posA)
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
-		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // First attack
+		events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // First attack
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			AssertAbilitySuccessful(msg,true)
@@ -99,9 +99,9 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg events.Bas
 						Lootpack: lootMsg.Lootpack,
 					})
 				})
-				events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Third Attack
+				events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // Third Attack
 			})
-			events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Second attack
+			events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // Second attack
 		})
 
 	}
@@ -122,7 +122,7 @@ func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg events.BaseE
 		unitB, _ := FindUnitUnderMouse(sts.World, posB)
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
-		events.Mailbox.Dispatch(events.InputInteractEvent{Point: goal})
+		events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: goal})
 
 		events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			centerA, centerB := unitA.Center(), unitB.Center()
@@ -137,7 +137,7 @@ func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg events.BaseE
 				events.Mailbox.Dispatch(events.TestNoAPAttackEvent{})
 
 			})
-			events.Mailbox.Dispatch(events.InputInteractEvent{Point: posA})
+			events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posA})
 
 		})
 
@@ -159,7 +159,7 @@ func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg events.Base
 		unitA.AP = 0
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
-		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB})
+		events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB})
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			AssertAbilitySuccessful(msg, false)
@@ -186,7 +186,7 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 		unitA, _ := FindUnitUnderMouse(sts.World, posA)
 
 		events.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
-		events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // First attack
+		events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // First attack
 
 		events.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
 			AssertAbilitySuccessful(msg,true)
@@ -210,9 +210,9 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 						Lootpack: lootMsg.Lootpack,
 					})
 				})
-				events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Third Attack
+				events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // Third Attack
 			})
-			events.Mailbox.Dispatch(events.InputInteractEvent{Point: posB}) // Second attack
+			events.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // Second attack
 		})
 
 	}

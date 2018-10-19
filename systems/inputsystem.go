@@ -38,6 +38,9 @@ func (is *InputSystem) New(world *ecs.World) {
 }
 
 func (is *InputSystem) Update(dt float32) {
+
+	selectedUnit := GetCurrentlySelectedUnit(is.World)
+
 	if engo.Input.Mouse.Action == engo.Press {
 		if IsDialogUnderMouse(is.World, is.MouseTracker.toPoint()) {
 			events.Mailbox.Dispatch(events.DialogClickEvent{Point: is.MouseTracker.toPoint()})
@@ -48,6 +51,7 @@ func (is *InputSystem) Update(dt float32) {
 		} else if engo.Input.Mouse.Button == engo.MouseButtonRight {
 			events.Mailbox.Dispatch(events.InputInteractEvent{
 				Point: is.MouseTracker.toPoint(),
+				Unit: selectedUnit,
 			})
 		}
 
@@ -56,7 +60,7 @@ func (is *InputSystem) Update(dt float32) {
 	} else if engo.Input.Button(INPUT_RUN_TESTS_KEY_BIND).JustPressed() {
 		events.Mailbox.Dispatch(events.TestBasicAttackEvent{})
 	} else if engo.Input.Button(INPUT_SHOW_INVENTORY_DIALOG).JustPressed() {
-		events.Mailbox.Dispatch(events.DialogShowInventoryEvent{})
+		events.Mailbox.Dispatch(events.ShowInventory{Unit: selectedUnit})
 	} else if engo.Input.Button(INPUT_HIDE_DIALOG).JustPressed() {
 		events.Mailbox.Dispatch(events.DialogHideEvent{})
 	}

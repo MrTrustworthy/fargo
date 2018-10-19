@@ -1,18 +1,23 @@
 package events
 
-import "engo.io/engo"
+import (
+	"engo.io/engo"
+	"github.com/MrTrustworthy/fargo/ui"
+)
 
 const (
-	DIALOG_SHOW_INVENTORY_EVENT = "DialogShowInventoryEvent"
+	DIALOG_SHOW_EVENT          = "DialogShowEvent"
 	DIALOG_HIDE_EVENT           = "DialogHideEvent"
 	DIALOG_CLICK_EVENT          = "DialogClickEvent"
 )
 
-type DialogShowInventoryEvent struct {}
+type DialogShowEvent struct {
+	*ui.Dialog
+}
 
-func (ce DialogShowInventoryEvent) Type() string { return DIALOG_SHOW_INVENTORY_EVENT }
+func (ce DialogShowEvent) Type() string { return DIALOG_SHOW_EVENT }
 
-func (ce DialogShowInventoryEvent) AsLogMessage() string {
+func (ce DialogShowEvent) AsLogMessage() string {
 	return "Showing dialog"
 }
 
