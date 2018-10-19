@@ -55,7 +55,7 @@ func NewButton(position engo.AABB, text string, callback func(*Button)) *Button 
 
 	button.RenderComponent = common.RenderComponent{
 		Drawable: common.Text{
-			Font: getFont(),
+			Font: getFont(color.Gray16{0x00ff00}),
 			Text: text,
 		},
 	}
@@ -110,12 +110,13 @@ func NewDialogBackground(outline engo.AABB) *DialogBackground {
 
 // UTILS
 
-func getFont() *common.Font {
+func getFont(bg color.Color) *common.Font {
 
 	fnt := &common.Font{
 		URL:  "fonts/Roboto-Regular.ttf",
 		FG:   color.Black,
 		Size: 16,
+		BG: bg,
 	}
 	err := fnt.CreatePreloaded()
 	if err != nil {

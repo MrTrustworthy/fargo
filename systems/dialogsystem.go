@@ -26,9 +26,7 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 		if !ok {
 			return
 		}
-		if ds.currentDialog != nil {
-			ds.HideCurrentDialog()
-		}
+		ds.EnsureCurrentDialogClosed()
 		ds.currentDialog = dsmsg.Dialog
 		ds.ShowCurrentDialog()
 	}
@@ -36,7 +34,7 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 
 func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
-		ds.HideCurrentDialog()
+		ds.EnsureCurrentDialogClosed()
 		ds.currentDialog = nil
 	}
 }
@@ -69,7 +67,10 @@ func (ds *DialogSystem) ShowCurrentDialog() {
 	}
 }
 
-func (ds *DialogSystem) HideCurrentDialog() {
+func (ds *DialogSystem) EnsureCurrentDialogClosed() {
+	if ds.currentDialog == nil {
+		return
+	}
 	for _, render := range ds.currentDialog.Elements {
 		RemoveFromRenderSystem(ds.world, render)
 	}
