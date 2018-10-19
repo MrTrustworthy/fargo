@@ -3,7 +3,6 @@ package systems
 import (
 	"engo.io/ecs"
 	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/ui"
 )
@@ -15,31 +14,28 @@ type DialogSystem struct {
 
 func (ds *DialogSystem) New(world *ecs.World) {
 	ds.world = world
-	events.Mailbox.Listen(events.DIALOG_SHOW_INVENTORY_EVENT, ds.getHandleShowInventoryDialog())
+	events.Mailbox.Listen(events.DIALOG_SHOW_EVENT, ds.getHandleShowDialog())
 	events.Mailbox.Listen(events.DIALOG_HIDE_EVENT, ds.getHandleHideDialog())
+	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ds.getHandleHideDialog())
 	events.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
 }
 
-func (ds *DialogSystem) getHandleShowInventoryDialog() func(msg events.BaseEvent) {
+func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
-		_, ok := msg.(events.DialogShowInventoryEvent)
+		dsmsg, ok := msg.(events.DialogShowEvent)
 		if !ok {
 			return
 		}
 		if ds.currentDialog != nil {
 			ds.HideCurrentDialog()
 		}
-		ds.currentDialog = ui.NewInventoryDialog()
+		ds.currentDialog = dsmsg.Dialog
 		ds.ShowCurrentDialog()
 	}
 }
 
 func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
-		_, ok := msg.(events.DialogHideEvent)
-		if !ok {
-			return
-		}
 		ds.HideCurrentDialog()
 		ds.currentDialog = nil
 	}
@@ -52,10 +48,8 @@ func (ds *DialogSystem) getHandleDialogClick() func(msg events.BaseEvent) {
 			return
 		}
 
-		fmt.Println("CLICKED DIALOG")
-
 		for _, elem := range ds.currentDialog.Elements {
-			if clicker, ok := elem.(ui.Clicker); ok && elem.GetSpaceComponent().Contains(dce.Point){
+			if clicker, ok := elem.(ui.Clicker); ok && elem.GetSpaceComponent().Contains(dce.Point) {
 				clicker.HandleClick()
 				return
 			}

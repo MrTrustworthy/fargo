@@ -4,73 +4,69 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
-	"fmt"
 	"image"
 	"image/color"
 )
-
-type Dialog struct {
-	Background *DialogBackground
-	Elements   []common.Renderable
-}
-
-func NewInventoryDialog() *Dialog {
-	dialogPosition := engo.AABB{Min: engo.Point{X: 100, Y: 100}, Max: engo.Point{X: 400, Y: 400}}
-	btnPosition := engo.AABB{Min: engo.Point{X: 120, Y: 120}, Max: engo.Point{X: 380, Y: 220}}
-
-	bg := NewDialogBackground(dialogPosition)
-	btn := NewInventoryButton(btnPosition, "Hello")
-	d := Dialog{
-		Background: bg,
-	}
-	d.Elements = append(d.Elements, bg, btn)
-	return &d
-}
 
 type Clicker interface {
 	HandleClick()
 }
 
+// DIALOG
+type Dialog struct {
+	Background *DialogBackground
+	Elements   []common.Renderable
+}
+
+func NewDialog(aabb engo.AABB) *Dialog {
+	dialog := &Dialog{}
+	bg := NewDialogBackground(aabb)
+	dialog.SetBackground(bg)
+	return dialog
+}
+
+func (d *Dialog) AddElement(elem common.Renderable) {
+	d.Elements = append(d.Elements, elem)
+}
+
+func (d *Dialog) SetBackground(bg *DialogBackground) {
+	d.Elements = append(d.Elements, bg)
+	d.Background = bg
+}
+
+// BUTTON
 type Button struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
+	clickCallback func(*Button)
 }
 
-func NewInventoryButton(outline engo.AABB, text string) *Button {
-	height, width := outline.Max.X-outline.Min.X, outline.Max.Y-outline.Min.Y
+func NewButton(position engo.AABB, text string, callback func(*Button)) *Button {
+
+	height, width := position.Max.X-position.Min.X, position.Max.Y-position.Min.Y
 
 	button := Button{BasicEntity: ecs.NewBasic()}
 	button.SpaceComponent = common.SpaceComponent{
-		Position: outline.Min,
+		Position: position.Min,
 		Width:    height,
 		Height:   width,
 	}
 
-	fnt := &common.Font{
-		URL:  "fonts/Roboto-Regular.ttf",
-		FG:   color.Black,
-		Size: 16,
-	}
-	err := fnt.CreatePreloaded()
-	if err != nil {
-		panic(err)
-	}
-
 	button.RenderComponent = common.RenderComponent{
 		Drawable: common.Text{
-			Font: fnt,
-			Text: "##",
+			Font: getFont(),
+			Text: text,
 		},
 	}
 	button.RenderComponent.SetShader(common.HUDShader)
 	button.RenderComponent.SetZIndex(201)
-	button.SetText(text)
+	button.clickCallback = callback
 	return &button
 }
 
 func (ht *Button) HandleClick() {
-	fmt.Println("WHOOOO CLICKED BUTTON")
+	ht.clickCallback(ht)
 }
 
 func (ht *Button) SetText(text string) {
@@ -79,6 +75,7 @@ func (ht *Button) SetText(text string) {
 	ht.RenderComponent.Drawable = textElem
 }
 
+// BACKGROUND
 type DialogBackground struct {
 	ecs.BasicEntity
 	common.RenderComponent
@@ -109,4 +106,20 @@ func NewDialogBackground(outline engo.AABB) *DialogBackground {
 	dBackground.RenderComponent.SetZIndex(200)
 
 	return &dBackground
+}
+
+// UTILS
+
+func getFont() *common.Font {
+
+	fnt := &common.Font{
+		URL:  "fonts/Roboto-Regular.ttf",
+		FG:   color.Black,
+		Size: 16,
+	}
+	err := fnt.CreatePreloaded()
+	if err != nil {
+		panic(err)
+	}
+	return fnt
 }
