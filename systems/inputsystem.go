@@ -60,7 +60,7 @@ func (is *InputSystem) Update(dt float32) {
 	} else if engo.Input.Button(INPUT_RUN_TESTS_KEY_BIND).JustPressed() {
 		events.Mailbox.Dispatch(events.TestBasicAttackEvent{})
 	} else if engo.Input.Button(INPUT_SHOW_INVENTORY_DIALOG).JustPressed() {
-		events.Mailbox.Dispatch(events.ShowInventory{Unit: selectedUnit})
+		events.Mailbox.Dispatch(events.ShowInventoryEvent{Unit: selectedUnit})
 	} else if engo.Input.Button(INPUT_HIDE_DIALOG).JustPressed() {
 		events.Mailbox.Dispatch(events.DialogHideEvent{})
 	}

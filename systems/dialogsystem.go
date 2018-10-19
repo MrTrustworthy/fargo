@@ -15,31 +15,28 @@ type DialogSystem struct {
 
 func (ds *DialogSystem) New(world *ecs.World) {
 	ds.world = world
-	//events.Mailbox.Listen(events.DIALOG_SHOW_INVENTORY_EVENT, ds.getHandleShowInventoryDialog())
+	events.Mailbox.Listen(events.DIALOG_SHOW_EVENT, ds.getHandleShowDialog())
 	events.Mailbox.Listen(events.DIALOG_HIDE_EVENT, ds.getHandleHideDialog())
+	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ds.getHandleHideDialog())
 	events.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
 }
 
-//func (ds *DialogSystem) getHandleShowInventoryDialog() func(msg events.BaseEvent) {
-//	return func(msg events.BaseEvent) {
-//		_, ok := msg.(events.DialogShowInventoryEvent)
-//		if !ok {
-//			return
-//		}
-//		if ds.currentDialog != nil {
-//			ds.HideCurrentDialog()
-//		}
-//		ds.currentDialog = ui.NewInventoryDialog()
-//		ds.ShowCurrentDialog()
-//	}
-//}
-
-func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
+func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 	return func(msg events.BaseEvent) {
-		_, ok := msg.(events.DialogHideEvent)
+		dsmsg, ok := msg.(events.DialogShowEvent)
 		if !ok {
 			return
 		}
+		if ds.currentDialog != nil {
+			ds.HideCurrentDialog()
+		}
+		ds.currentDialog = dsmsg.Dialog
+		ds.ShowCurrentDialog()
+	}
+}
+
+func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
+	return func(msg events.BaseEvent) {
 		ds.HideCurrentDialog()
 		ds.currentDialog = nil
 	}

@@ -3,16 +3,16 @@ package events
 import "github.com/MrTrustworthy/fargo/entities"
 
 const (
-	INVENTORY_SHOW_EVENT = "ShowInventory"
+	INVENTORY_SHOW_EVENT = "ShowInventoryEvent"
 
 )
 
-type ShowInventory struct {
+type ShowInventoryEvent struct {
 	*entities.Unit
 }
 
-func (ce ShowInventory) Type() string { return INVENTORY_SHOW_EVENT }
+func (ce ShowInventoryEvent) Type() string { return INVENTORY_SHOW_EVENT }
 
-func (ce ShowInventory) AsLogMessage() string {
-	return "Showing dialog"
+func (ce ShowInventoryEvent) AsLogMessage() string {
+	return "Showing inventory for selected unit"
 }
