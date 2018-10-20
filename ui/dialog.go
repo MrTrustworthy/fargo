@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"github.com/MrTrustworthy/fargo/events"
 	"image"
 	"image/color"
 )
@@ -39,10 +40,10 @@ type Button struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
-	clickCallback func(*Button)
+	callbackEvent events.BaseEvent
 }
 
-func NewButton(position engo.AABB, text string, callback func(*Button)) *Button {
+func NewButton(position engo.AABB, text string, callbackEvent events.BaseEvent) *Button {
 
 	height, width := position.Max.X-position.Min.X, position.Max.Y-position.Min.Y
 
@@ -61,12 +62,12 @@ func NewButton(position engo.AABB, text string, callback func(*Button)) *Button 
 	}
 	button.RenderComponent.SetShader(common.HUDShader)
 	button.RenderComponent.SetZIndex(201)
-	button.clickCallback = callback
+	button.callbackEvent = callbackEvent
 	return &button
 }
 
 func (ht *Button) HandleClick() {
-	ht.clickCallback(ht)
+	events.Mailbox.Dispatch(ht.callbackEvent)
 }
 
 func (ht *Button) SetText(text string) {

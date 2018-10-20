@@ -2,8 +2,8 @@ package ui
 
 import (
 	"engo.io/engo"
-	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
+	"github.com/MrTrustworthy/fargo/events"
 	"strconv"
 )
 
@@ -18,7 +18,8 @@ func NewInventoryDialog(inventory *entities.Inventory) *Dialog {
 			Min: engo.Point{X: 120, Y: float32(120 + offset)},
 			Max: engo.Point{X: 380, Y: float32(220 + offset)},
 		}
-		btn := NewButton(btnPosition, item.Name+": "+strconv.Itoa(amount), func(btn *Button) { fmt.Println("Clicked on " + item.Name) })
+		event := events.InventoryElementClickedEvent{}
+		btn := NewButton(btnPosition, item.Name+": "+strconv.Itoa(amount), event)
 		d.AddElement(btn)
 		offset += 20
 	}
