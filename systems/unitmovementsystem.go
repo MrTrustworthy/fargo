@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitMovementSystem struct {
@@ -20,13 +21,13 @@ type UnitMovementSystem struct {
 func (ums *UnitMovementSystem) New(world *ecs.World) {
 	ums.world = world
 	// Constraint: For EVERY requestmove, there MUST be a MovementCompleted Event! Else other systems might wait for ever
-	events.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
-	events.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
+	eventsystem.Mailbox.Listen(events.MOVEMENT_REQUESTMOVE_EVENT_NAME, ums.getHandleInteractionEvent())
+	eventsystem.Mailbox.Listen(events.COLLISON_EVENT_NAME, ums.getHandleCollisionEvent())
 
 }
 
-func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		amsg, ok := msg.(events.MovementRequestEvent)
 		if !ok {
 			return
@@ -39,8 +40,8 @@ func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg events.BaseE
 	}
 }
 
-func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		cmsg, ok := msg.(events.CollisionEvent)
 		if !ok {
 			return
@@ -85,7 +86,7 @@ func (ums *UnitMovementSystem) Update(dt float32) {
 
 	// stop here if movement is not yet finished
 	if len(ums.CurrentPath) > 0 {
-		events.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
+		eventsystem.Mailbox.Dispatch(events.MovementStepEvent{Unit: ums.CurrentUnit})
 	} else {
 		ums.StopMovement(true)
 	}
@@ -100,7 +101,7 @@ func (ums *UnitMovementSystem) SubtractAPForMovement() error {
 	if ums.CurrentUnit.UnitAttributes.AP != 0 {
 		ums.CurrentUnit.UnitAttributes.AP--
 		ums.CurrentUnit.StepsLeftForAP = int(ums.CurrentUnit.UnitAttributes.Speed * 10)
-		events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ums.CurrentUnit})
+		eventsystem.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ums.CurrentUnit})
 		return nil
 	}
 
@@ -126,7 +127,7 @@ func (ums *UnitMovementSystem) StopMovement(successful bool) {
 	ums.CurrentPath = nil
 	ums.LastPosition = engo.Point{}
 	oldUnit.AnimationComponent.SelectAnimationByName("idle")
-	events.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit, Successful: successful})
+	eventsystem.Mailbox.Dispatch(events.MovementCompletedEvent{Unit: oldUnit, Successful: successful})
 }
 
 func InterpolateBetween(a, b engo.Point, stepSize float32) []engo.Point {

@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UserInterfaceSystem struct {
@@ -18,14 +19,14 @@ func (uis *UserInterfaceSystem) New(world *ecs.World) {
 	AddToRenderSystem(uis.World, uis.MainHUD)
 	uis.SelectText = entities.NewHUDText()
 	AddToRenderSystem(uis.World, uis.SelectText)
-	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, uis.getHandleSelectEvent())
-	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, uis.getHandleDeselectEvent())
-	events.Mailbox.Listen(events.UNIT_ATTRIBUTE_CHANGE_EVENT, uis.getHandleAttributeChangeEvent())
+	eventsystem.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, uis.getHandleSelectEvent())
+	eventsystem.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, uis.getHandleDeselectEvent())
+	eventsystem.Mailbox.Listen(events.UNIT_ATTRIBUTE_CHANGE_EVENT, uis.getHandleAttributeChangeEvent())
 
 }
 
-func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		imsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
@@ -34,8 +35,8 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg events.BaseEvent
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		_, ok := msg.(events.SelectionDeselectedEvent)
 		if !ok {
 			return
@@ -44,8 +45,8 @@ func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg events.BaseEve
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		imsg, ok := msg.(events.UnitAttributesChangedEvent)
 		if !ok {
 			return

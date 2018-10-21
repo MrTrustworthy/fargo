@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitCreationSystem struct {
@@ -14,13 +15,13 @@ type UnitCreationSystem struct {
 
 func (ucs *UnitCreationSystem) New(world *ecs.World) {
 	ucs.World = world
-	events.Mailbox.Listen(events.INPUT_CREATEUNIT_EVENT_NAME, ucs.getHandleInputEvent())
+	eventsystem.Mailbox.Listen(events.INPUT_CREATEUNIT_EVENT_NAME, ucs.getHandleInputEvent())
 }
 
 func (ucs *UnitCreationSystem) Update(dt float32) {}
 
-func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		imsg, ok := msg.(events.InputCreateunitEvent)
 		if !ok {
 			return

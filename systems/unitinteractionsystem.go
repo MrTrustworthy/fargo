@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitInteractionSystem struct {
@@ -11,11 +12,11 @@ type UnitInteractionSystem struct {
 
 func (uis *UnitInteractionSystem) New(world *ecs.World) {
 	uis.World = world
-	events.Mailbox.Listen(events.INPUT_INTERACT_EVENT_NAME, uis.getHandleInputEvent())
+	eventsystem.Mailbox.Listen(events.INPUT_INTERACT_EVENT_NAME, uis.getHandleInputEvent())
 }
 
-func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		imsg, ok := msg.(events.InputInteractEvent)
 		if !ok {
 			return
@@ -31,16 +32,16 @@ func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg events.BaseEven
 				return
 			}
 			selectedUnit.SelectedAbility.SetTarget(clickedUnit)
-			events.Mailbox.Dispatch(events.RequestAbilityUseEvent{
+			eventsystem.Mailbox.Dispatch(events.RequestAbilityUseEvent{
 				Ability: &selectedUnit.SelectedAbility,
 			})
 		} else if clickedLootpack, err := FindLootUnderMouse(uis.World, imsg.Point); err == nil {
-			events.Mailbox.Dispatch(events.RequestLootPickupEvent{
+			eventsystem.Mailbox.Dispatch(events.RequestLootPickupEvent{
 				Unit:     selectedUnit,
 				Lootpack: clickedLootpack,
 			})
 		} else {
-			events.Mailbox.Dispatch(events.MovementRequestEvent{
+			eventsystem.Mailbox.Dispatch(events.MovementRequestEvent{
 				Target:         imsg.Point,
 				StopAtDistance: 0,
 				Unit:           selectedUnit,

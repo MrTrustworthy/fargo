@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 	"github.com/MrTrustworthy/fargo/ui"
 )
 
@@ -14,14 +15,14 @@ type DialogSystem struct {
 
 func (ds *DialogSystem) New(world *ecs.World) {
 	ds.world = world
-	events.Mailbox.Listen(events.DIALOG_SHOW_EVENT, ds.getHandleShowDialog())
-	events.Mailbox.Listen(events.DIALOG_HIDE_EVENT, ds.getHandleHideDialog())
-	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ds.getHandleHideDialog())
-	events.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
+	eventsystem.Mailbox.Listen(events.DIALOG_SHOW_EVENT, ds.getHandleShowDialog())
+	eventsystem.Mailbox.Listen(events.DIALOG_HIDE_EVENT, ds.getHandleHideDialog())
+	eventsystem.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ds.getHandleHideDialog())
+	eventsystem.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
 }
 
-func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ds *DialogSystem) getHandleShowDialog() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		dsmsg, ok := msg.(events.DialogShowEvent)
 		if !ok {
 			return
@@ -32,15 +33,15 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg events.BaseEvent) {
 	}
 }
 
-func (ds *DialogSystem) getHandleHideDialog() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ds *DialogSystem) getHandleHideDialog() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		ds.EnsureCurrentDialogClosed()
 		ds.currentDialog = nil
 	}
 }
 
-func (ds *DialogSystem) getHandleDialogClick() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ds *DialogSystem) getHandleDialogClick() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		dce, ok := msg.(events.DialogClickEvent)
 		if !ok {
 			return
