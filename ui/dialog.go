@@ -67,6 +67,7 @@ func NewButton(position engo.AABB, text string, callbackEvent eventsystem.BaseEv
 }
 
 func (ht *Button) HandleClick() {
+	// TODO put this in DialogSystem.getHandleDialogClick() to avoid dependency on events from UI
 	eventsystem.Mailbox.Dispatch(ht.CallbackEvent)
 }
 

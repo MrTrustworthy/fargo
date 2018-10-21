@@ -63,6 +63,8 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 
 		posA, posB := engo.Point{X: 200, Y: 150}, engo.Point{X: 400, Y: 150}
 
+		itemPositionOnLootpackDialog := engo.Point{X: 130, Y: 130}
+
 		eventsystem.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputCreateunitEvent{Point: posB})
 
@@ -82,17 +84,33 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
 					lootPos := lootMsg.Lootpack.SpaceComponent.Center()
 
-					eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
-						fmt.Println("Test 2: Loot picked up")
-						if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
-							Assert(lmsg.Successful, "Loot pickup should have been successful")
-						}
-						centerA := unitA.Center()
-						Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
-						Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
-						Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
-						fmt.Println("Test 2: getHandleKillAndLootEvent passed")
-						eventsystem.Mailbox.Dispatch(events.TestCollisionEvent{})
+
+
+					eventsystem.Mailbox.ListenOnce(events.DIALOG_SHOWN_EVENT, func(msg eventsystem.BaseEvent) {
+						fmt.Println("Test 2: PickupDialog shown")
+
+						// dialog_shown is re-triggered when the lootbox dialog updates again
+						eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_ITEM_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+							fmt.Println("Test 2: First item picked up")
+
+							eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+								fmt.Println("Test 2: Loot completely picked up")
+								if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
+									Assert(lmsg.Successful, "Loot pickup should have been successful")
+								}
+								centerA := unitA.Center()
+								Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
+								Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
+								Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
+								fmt.Println("Test 2: getHandleKillAndLootEvent passed")
+								eventsystem.Mailbox.Dispatch(events.TestCollisionEvent{})
+							})
+
+
+							eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: itemPositionOnLootpackDialog})
+						})
+
+						eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: itemPositionOnLootpackDialog})
 					})
 
 					eventsystem.Mailbox.Dispatch(events.RequestLootPickupEvent{ // Loot pickup request

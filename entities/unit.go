@@ -62,7 +62,7 @@ func NewUnit() *Unit {
 		UnitAttributes: UnitAttributes{
 			Name:   namepicker.RandomName(),
 			Speed:  5.0,
-			Health: 1,
+			Health: 10,
 			AP:     7,
 		},
 		Inventory:  NewSampleInventory(),

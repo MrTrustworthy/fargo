@@ -30,6 +30,7 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg eventsystem.BaseEvent) {
 		ds.EnsureCurrentDialogClosed()
 		ds.currentDialog = dsmsg.Dialog
 		ds.ShowCurrentDialog()
+		eventsystem.Mailbox.Dispatch(events.DialogShownEvent{Dialog: ds.currentDialog})
 	}
 }
 

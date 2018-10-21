@@ -81,16 +81,17 @@ func (lss *LootManagementSystem) getHandleItemPickup() func(msg eventsystem.Base
 		}
 		rlipe.Unit.Inventory.Add(*rlipe.Item, amount)
 
+		// refresh lootpack dialog
+		lss.ensurePickupDialog(rlipe.Unit, rlipe.Lootpack)
+		// refresh unit item display
+		eventsystem.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: rlipe.Unit})
+
 		eventsystem.Mailbox.Dispatch(events.LootPickupItemCompletedEvent{
 			Unit:       rlipe.Unit,
 			Lootpack:   rlipe.Lootpack,
 			Item:       rlipe.Item,
 			Successful: true,
 		})
-		// refresh lootpack dialog
-		lss.ensurePickupDialog(rlipe.Unit, rlipe.Lootpack)
-		// refresh unit item display
-		eventsystem.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: rlipe.Unit})
 
 		// clean up lootpack after picking up the last item
 		if rlipe.Lootpack.IsEmpty() {
@@ -158,20 +159,10 @@ func CreateLootboxPickupDialog(unit *entities.Unit, lootpack *entities.Lootpack)
 			Lootpack: lootpack,
 			Item:     &item,
 		}
-		fmt.Println("Added event for item", (&item).Name)
 		btn := ui.NewButton(btnPosition, item.Name+": "+strconv.Itoa(amount), event)
 		d.AddElement(btn)
 		offset += 40
 	}
-
-	for _, but := range d.Elements {
-		if b, ok := but.(*ui.Button); ok {
-			e := b.CallbackEvent.(events.RequestLootItemPickupEvent)
-			fmt.Println("Event is for ", e.Item.Name)
-		}
-
-	}
-
 	return d
 }
 
