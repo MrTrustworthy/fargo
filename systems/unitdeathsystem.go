@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitDeathSystem struct {
@@ -13,11 +14,11 @@ type UnitDeathSystem struct {
 
 func (uds *UnitDeathSystem) New(world *ecs.World) {
 	uds.World = world
-	events.Mailbox.Listen(events.UNIT_DEATH_EVENT, uds.getHandleUnitDeathEvent())
+	eventsystem.Mailbox.Listen(events.UNIT_DEATH_EVENT, uds.getHandleUnitDeathEvent())
 }
 
-func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		udmsg, ok := msg.(events.UnitDeathEvent)
 		if !ok {
 			return
@@ -36,9 +37,9 @@ func (uds *UnitDeathSystem) Update(dt float32) {
 	animation := uds.dyingUnit.GetAnimationComponent().CurrentAnimation
 	if animation != nil && animation.Name != "dead" {
 		lootPosition := uds.dyingUnit.GetSpaceComponent().Center()
-		events.Mailbox.Dispatch(events.UnitRemovalEvent{Unit: uds.dyingUnit})
+		eventsystem.Mailbox.Dispatch(events.UnitRemovalEvent{Unit: uds.dyingUnit})
 		uds.dyingUnit = nil
-		events.Mailbox.Dispatch(events.RequestLootSpawn{Point: lootPosition})
+		eventsystem.Mailbox.Dispatch(events.RequestLootSpawn{Point: lootPosition})
 	}
 }
 

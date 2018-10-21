@@ -3,6 +3,7 @@ package systems
 import (
 	"engo.io/ecs"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitCollisionSystem struct {
@@ -11,14 +12,14 @@ type UnitCollisionSystem struct {
 
 func (ucs *UnitCollisionSystem) New(world *ecs.World) {
 	ucs.world = world
-	events.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
+	eventsystem.Mailbox.Listen(events.MOVEMENT_STEP_EVENT_NAME, ucs.getHandleMoveStepEvent())
 }
 
 // The collision systems works as follows: Each step of a movement, the moving unit is checked against all other units.
 // If a collision is detected, a CollisionEvent is sent. In that case, the MovementSystem is responsible for handling
 // the collision by cancelling the movement and resetting the unit to its last known good position.
-func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		mmsg, ok := msg.(events.MovementStepEvent)
 		if !ok {
 			return
@@ -39,7 +40,7 @@ func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg events.BaseEve
 				continue
 			}
 
-			events.Mailbox.Dispatch(events.CollisionEvent{
+			eventsystem.Mailbox.Dispatch(events.CollisionEvent{
 				ActiveUnit:  mmsg.Unit,
 				PassiveUnit: other,
 			})

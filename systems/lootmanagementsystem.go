@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 const LOOT_PICKUP_DISTANCE = 20.0
@@ -18,13 +19,13 @@ type LootManagementSystem struct {
 
 func (lss *LootManagementSystem) New(world *ecs.World) {
 	lss.World = world
-	events.Mailbox.Listen(events.LOOT_REQUEST_SPAWN_EVENT, lss.getHandleRequestLootSpawn())
-	events.Mailbox.Listen(events.LOOT_REQUEST_PICKUP_EVENT, lss.getHandleRequestLootPickup())
+	eventsystem.Mailbox.Listen(events.LOOT_REQUEST_SPAWN_EVENT, lss.getHandleRequestLootSpawn())
+	eventsystem.Mailbox.Listen(events.LOOT_REQUEST_PICKUP_EVENT, lss.getHandleRequestLootPickup())
 
 }
 
-func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		udmsg, ok := msg.(events.RequestLootSpawn)
 		if !ok {
 			return
@@ -33,12 +34,12 @@ func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg events.Bas
 		lootpack := entities.NewLootpack(&udmsg.Point)
 		lss.ActiveLootPacks = append(lss.ActiveLootPacks, lootpack)
 		AddToRenderSystem(lss.World, lootpack)
-		events.Mailbox.Dispatch(events.LootHasSpawnedEvent{Lootpack: lootpack})
+		eventsystem.Mailbox.Dispatch(events.LootHasSpawnedEvent{Lootpack: lootpack})
 	}
 }
 
-func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		udmsg, ok := msg.(events.RequestLootPickupEvent)
 		if !ok {
 			return
@@ -62,19 +63,19 @@ func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg events.Ba
 func (lss *LootManagementSystem) executePickup(pickupEvent *events.RequestLootPickupEvent) {
 	pickupEvent.Unit.Inventory.FillFrom(*pickupEvent.Lootpack.Inventory)
 	lss.RemoveLootbox(pickupEvent.Lootpack)
-	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: pickupEvent.Unit})
-	events.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: true})
+	eventsystem.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: pickupEvent.Unit})
+	eventsystem.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: true})
 }
 
 func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
-	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
 		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
-			events.Mailbox.Dispatch(*pickupEvent)
+			eventsystem.Mailbox.Dispatch(*pickupEvent)
 		} else {
-			events.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: false})
+			eventsystem.Mailbox.Dispatch(events.LootPickupCompletedEvent{Lootpack: pickupEvent.Lootpack, Successful: false})
 		}
 	})
-	events.Mailbox.Dispatch(events.MovementRequestEvent{
+	eventsystem.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         pickupEvent.Lootpack.Center(),
 		StopAtDistance: LOOT_PICKUP_DISTANCE,
 		Unit:           pickupEvent.Unit,

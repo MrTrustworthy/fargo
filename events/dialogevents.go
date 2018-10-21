@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	DIALOG_SHOW_EVENT          = "DialogShowEvent"
-	DIALOG_HIDE_EVENT           = "DialogHideEvent"
-	DIALOG_CLICK_EVENT          = "DialogClickEvent"
+	DIALOG_SHOW_EVENT  = "DialogShowEvent"
+	DIALOG_HIDE_EVENT  = "DialogHideEvent"
+	DIALOG_CLICK_EVENT = "DialogClickEvent"
 )
 
 type DialogShowEvent struct {
@@ -21,7 +21,7 @@ func (ce DialogShowEvent) AsLogMessage() string {
 	return "Showing dialog"
 }
 
-type DialogHideEvent struct {}
+type DialogHideEvent struct{}
 
 func (ce DialogHideEvent) Type() string { return DIALOG_HIDE_EVENT }
 

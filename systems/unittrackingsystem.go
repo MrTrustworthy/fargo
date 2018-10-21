@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitTrackingSystem struct {
@@ -20,15 +21,15 @@ func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
 
 func (ss *UnitTrackingSystem) New(world *ecs.World) {
 	ss.World = world
-	events.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
-	events.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
-	events.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
-	events.Mailbox.Listen(events.UNIT_REMOVAL_EVENT, ss.getHandleRemoveUnitEvent())
+	eventsystem.Mailbox.Listen(events.INPUT_SELECT_EVENT_NAME, ss.getHandleInputEvent())
+	eventsystem.Mailbox.Listen(events.SELECTION_SELECTED_EVENT_NAME, ss.getHandleSelectEvent())
+	eventsystem.Mailbox.Listen(events.SELECTION_DESELECTED_EVENT_NAME, ss.getHandleDeselectEvent())
+	eventsystem.Mailbox.Listen(events.UNIT_REMOVAL_EVENT, ss.getHandleRemoveUnitEvent())
 
 }
 
-func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		imsg, ok := msg.(events.InputSelectEvent)
 		if !ok {
 			return
@@ -37,18 +38,18 @@ func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg events.BaseEvent) {
 		if ss.SelectedUnit != nil {
 			deselectedUnit := ss.SelectedUnit
 			ss.SelectedUnit = nil
-			events.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
+			eventsystem.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
 		}
 
 		if unit, err := ss.findUnitUnderMouse(imsg.Point); err == nil {
 			ss.SelectedUnit = unit
-			events.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
+			eventsystem.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
 		}
 	}
 }
 
-func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		smsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
@@ -57,8 +58,8 @@ func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg events.BaseEvent) 
 	}
 }
 
-func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		smsg, ok := msg.(events.SelectionDeselectedEvent)
 		if !ok {
 			return
@@ -67,8 +68,8 @@ func (ss *UnitTrackingSystem) getHandleDeselectEvent() func(msg events.BaseEvent
 	}
 }
 
-func (ss *UnitTrackingSystem) getHandleRemoveUnitEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (ss *UnitTrackingSystem) getHandleRemoveUnitEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		smsg, ok := msg.(events.UnitRemovalEvent)
 		if !ok {
 			return

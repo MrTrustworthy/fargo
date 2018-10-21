@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 )
 
 type UnitAbilitySystem struct {
@@ -14,12 +15,12 @@ type UnitAbilitySystem struct {
 
 func (uas *UnitAbilitySystem) New(world *ecs.World) {
 	uas.world = world
-	events.Mailbox.Listen(events.ABILITY_REQUESTUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
+	eventsystem.Mailbox.Listen(events.ABILITY_REQUESTUSE_EVENT_NAME, uas.getHandleRequestAbilityEvent())
 
 }
 
-func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.BaseEvent) {
-	return func(msg events.BaseEvent) {
+func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg eventsystem.BaseEvent) {
+	return func(msg eventsystem.BaseEvent) {
 		raue, ok := msg.(events.RequestAbilityUseEvent)
 		if !ok {
 			return
@@ -46,7 +47,7 @@ func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg events.Bas
 func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent) {
 	ability := *raue.Ability
 	if !ability.CanExecute() {
-		events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: false})
+		eventsystem.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: false})
 		return
 	}
 	uas.executingAbility = ability
@@ -56,14 +57,14 @@ func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent
 
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
-	events.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg events.BaseEvent) {
+	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
 		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
-			events.Mailbox.Dispatch(*raue)
+			eventsystem.Mailbox.Dispatch(*raue)
 		} else {
-			events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: raue.Ability, Successful: false})
+			eventsystem.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: raue.Ability, Successful: false})
 		}
 	})
-	events.Mailbox.Dispatch(events.MovementRequestEvent{
+	eventsystem.Mailbox.Dispatch(events.MovementRequestEvent{
 		Target:         target.Center(),
 		StopAtDistance: source.SelectedAbility.Maxrange(),
 		Unit:           source,
@@ -85,20 +86,20 @@ func (uas *UnitAbilitySystem) Update(dt float32) {
 	// actually execute the results of the ability
 	ability := uas.executingAbility
 	ability.Source().AP -= ability.Cost()
-	events.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
+	eventsystem.Mailbox.Dispatch(events.UnitAttributesChangedEvent{Unit: ability.Source()})
 
-	events.Mailbox.Dispatch(events.RequestUnitDamageEvent{
+	eventsystem.Mailbox.Dispatch(events.RequestUnitDamageEvent{
 		Unit:   ability.Target(),
 		Damage: ability.Damage(),
 	})
 
 	if ability.Target().Health <= 0 {
-		events.Mailbox.Dispatch(events.UnitDeathEvent{
+		eventsystem.Mailbox.Dispatch(events.UnitDeathEvent{
 			Unit: ability.Target(),
 		})
 	}
 	uas.executingAbility = nil
-	events.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: true})
+	eventsystem.Mailbox.Dispatch(events.AbilityCompletedEvent{Ability: &ability, Successful: true})
 }
 
 func (uas *UnitAbilitySystem) IsIdle() bool {
