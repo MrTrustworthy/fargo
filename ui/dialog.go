@@ -40,7 +40,7 @@ type Button struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
-	callbackEvent eventsystem.BaseEvent
+	CallbackEvent eventsystem.BaseEvent
 }
 
 func NewButton(position engo.AABB, text string, callbackEvent eventsystem.BaseEvent) *Button {
@@ -62,12 +62,13 @@ func NewButton(position engo.AABB, text string, callbackEvent eventsystem.BaseEv
 	}
 	button.RenderComponent.SetShader(common.HUDShader)
 	button.RenderComponent.SetZIndex(201)
-	button.callbackEvent = callbackEvent
+	button.CallbackEvent = callbackEvent
 	return &button
 }
 
 func (ht *Button) HandleClick() {
-	eventsystem.Mailbox.Dispatch(ht.callbackEvent)
+	// TODO put this in DialogSystem.getHandleDialogClick() to avoid dependency on events from UI
+	eventsystem.Mailbox.Dispatch(ht.CallbackEvent)
 }
 
 func (ht *Button) SetText(text string) {

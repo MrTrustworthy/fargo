@@ -7,10 +7,12 @@ import (
 )
 
 const (
-	LOOT_REQUEST_SPAWN_EVENT    = "RequestUnitDamageEvent"
-	LOOT_REQUEST_PICKUP_EVENT   = "RequestLootPickupEvent"
-	LOOT_PICKUP_COMPLETED_EVENT = "LootPickupCompletedEvent"
-	LOOT_HAS_SPAWNED_EVENT      = "LootHasSpawnedEvent"
+	LOOT_REQUEST_SPAWN_EVENT         = "RequestUnitDamageEvent"
+	LOOT_REQUEST_PICKUP_EVENT        = "RequestLootPickupEvent"
+	LOOT_REQUEST_ITEM_PICKUP_EVENT   = "RequestLootItemPickupEvent"
+	LOOT_PICKUP_COMPLETED_EVENT      = "LootPickupCompletedEvent"
+	LOOT_PICKUP_ITEM_COMPLETED_EVENT = "LootPickupItemCompletedEvent"
+	LOOT_HAS_SPAWNED_EVENT           = "LootHasSpawnedEvent"
 )
 
 type RequestLootSpawn struct {
@@ -34,16 +36,6 @@ func (se RequestLootPickupEvent) AsLogMessage() string {
 	return "Unit " + se.Unit.Name + " should pickup lootpack"
 }
 
-type LootHasSpawnedEvent struct {
-	*entities.Lootpack
-}
-
-func (se LootHasSpawnedEvent) Type() string { return LOOT_HAS_SPAWNED_EVENT }
-
-func (se LootHasSpawnedEvent) AsLogMessage() string {
-	return "Loot has spawned"
-}
-
 type LootPickupCompletedEvent struct {
 	*entities.Lootpack
 	Successful bool
@@ -57,4 +49,43 @@ func (se LootPickupCompletedEvent) AsLogMessage() string {
 		s = "Successfully"
 	}
 	return "Loot pickup completed " + s
+}
+
+type RequestLootItemPickupEvent struct {
+	*entities.Unit
+	*entities.Item
+	*entities.Lootpack
+}
+
+func (se RequestLootItemPickupEvent) Type() string { return LOOT_REQUEST_ITEM_PICKUP_EVENT }
+
+func (se RequestLootItemPickupEvent) AsLogMessage() string {
+	return "Unit " + se.Unit.Name + " should pickup item " + se.Item.Name + " from lootpack"
+}
+
+type LootPickupItemCompletedEvent struct {
+	*entities.Unit
+	*entities.Item
+	*entities.Lootpack
+	Successful bool
+}
+
+func (se LootPickupItemCompletedEvent) Type() string { return LOOT_PICKUP_ITEM_COMPLETED_EVENT }
+
+func (se LootPickupItemCompletedEvent) AsLogMessage() string {
+	s := "with a failure"
+	if se.Successful {
+		s = "Successfully"
+	}
+	return "Loot item pickup completed " + s
+}
+
+type LootHasSpawnedEvent struct {
+	*entities.Lootpack
+}
+
+func (se LootHasSpawnedEvent) Type() string { return LOOT_HAS_SPAWNED_EVENT }
+
+func (se LootHasSpawnedEvent) AsLogMessage() string {
+	return "Loot has spawned"
 }

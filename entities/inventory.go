@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"errors"
 	"strconv"
 )
 
@@ -22,6 +23,22 @@ func (i Inventory) Clear() {
 
 func (i Inventory) Add(item Item, count int) {
 	i[item] += count
+}
+
+func (i Inventory) RemoveAll(item Item) (int, error) {
+	amount := i[item]
+	return amount, i.Remove(item, i[item])
+}
+
+func (i Inventory) Remove(item Item, count int) error {
+	if i[item] > count {
+		return errors.New("not enough items to remove")
+	}
+	i[item] -= count
+	if i[item] == 0 {
+		delete(i, item)
+	}
+	return nil
 }
 
 func (i Inventory) String() string {

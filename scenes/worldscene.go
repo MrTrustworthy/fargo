@@ -41,6 +41,7 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	world.AddSystem(&systems.LootManagementSystem{})
 	world.AddSystem(&systems.UnitInventorySystem{})
 	world.AddSystem(&systems.DialogSystem{})
+	world.AddSystem(&systems.TickSystem{})
 
 	world.AddSystem(&systems.SimulationTestSystem{})
 
