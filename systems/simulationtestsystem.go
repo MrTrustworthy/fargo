@@ -84,8 +84,6 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
 					lootPos := lootMsg.Lootpack.SpaceComponent.Center()
 
-
-
 					eventsystem.Mailbox.ListenOnce(events.DIALOG_SHOWN_EVENT, func(msg eventsystem.BaseEvent) {
 						fmt.Println("Test 2: PickupDialog shown")
 
@@ -93,21 +91,24 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 						eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_ITEM_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
 							fmt.Println("Test 2: First item picked up")
 
-							eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
-								fmt.Println("Test 2: Loot completely picked up")
-								if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
-									Assert(lmsg.Successful, "Loot pickup should have been successful")
-								}
-								centerA := unitA.Center()
-								Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
-								Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
-								Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
-								fmt.Println("Test 2: getHandleKillAndLootEvent passed")
-								eventsystem.Mailbox.Dispatch(events.TestCollisionEvent{})
+							// Need to wait for one tick or weird things start to happen
+							eventsystem.Mailbox.ListenOnce(events.TICK_EVENT, func(msg eventsystem.BaseEvent) {
+
+								eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+									fmt.Println("Test 2: Loot completely picked up")
+									if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
+										Assert(lmsg.Successful, "Loot pickup should have been successful")
+									}
+									centerA := unitA.Center()
+									Assert(centerA.PointDistance(lootPos) <= LOOT_PICKUP_DISTANCE, "Should be in distance for pickup")
+									Assert(unitA.AP == 0, "Should have 0 AP left after move and 3 attacks")
+									Assert(unitA.Inventory.Size() == 8, "Should have 8 items now")
+									fmt.Println("Test 2: getHandleKillAndLootEvent passed")
+									eventsystem.Mailbox.Dispatch(events.TestCollisionEvent{})
+								})
+
+								eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: itemPositionOnLootpackDialog})
 							})
-
-
-							eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: itemPositionOnLootpackDialog})
 						})
 
 						eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: itemPositionOnLootpackDialog})

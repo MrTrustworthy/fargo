@@ -15,7 +15,7 @@ func main() {
 func logMsg(eventChan chan eventsystem.BaseEvent) {
 	for true {
 		msg := <-eventChan
-		if msg.Type() != events.MOVEMENT_STEP_EVENT_NAME {
+		if msg.Type() != events.MOVEMENT_STEP_EVENT_NAME && msg.Type() != events.TICK_EVENT {
 			fmt.Println(msg.Type(), msg.AsLogMessage())
 		}
 	}
