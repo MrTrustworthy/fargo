@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
 )
@@ -46,6 +47,7 @@ func (is *InputSystem) Update(dt float32) {
 		if IsDialogUnderMouse(is.World, is.MouseTracker.toPoint()) {
 			eventsystem.Mailbox.Dispatch(events.DialogClickEvent{Point: is.MouseTracker.toPoint()})
 		} else if engo.Input.Mouse.Button == engo.MouseButtonLeft {
+			fmt.Println("Whoooop")
 			eventsystem.Mailbox.Dispatch(events.InputSelectEvent{
 				Point: is.MouseTracker.toPoint(),
 			})

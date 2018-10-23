@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
@@ -25,8 +26,8 @@ func (uis *UserInterfaceSystem) New(world *ecs.World) {
 
 }
 
-func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		imsg, ok := msg.(events.SelectionSelectedEvent)
 		if !ok {
 			return
@@ -35,8 +36,8 @@ func (uis *UserInterfaceSystem) getHandleSelectEvent() func(msg eventsystem.Base
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		_, ok := msg.(events.SelectionDeselectedEvent)
 		if !ok {
 			return
@@ -45,8 +46,8 @@ func (uis *UserInterfaceSystem) getHandleDeselectEvent() func(msg eventsystem.Ba
 	}
 }
 
-func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uis *UserInterfaceSystem) getHandleAttributeChangeEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		imsg, ok := msg.(events.UnitAttributesChangedEvent)
 		if !ok {
 			return

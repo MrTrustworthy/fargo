@@ -20,8 +20,8 @@ func (ucs *UnitCreationSystem) New(world *ecs.World) {
 
 func (ucs *UnitCreationSystem) Update(dt float32) {}
 
-func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		imsg, ok := msg.(events.InputCreateunitEvent)
 		if !ok {
 			return

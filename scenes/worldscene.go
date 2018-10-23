@@ -4,6 +4,9 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
+	"fmt"
+	"github.com/MrTrustworthy/fargo/events"
+	"github.com/MrTrustworthy/fargo/eventsystem"
 	"github.com/MrTrustworthy/fargo/systems"
 )
 
@@ -50,4 +53,14 @@ func (scene *WorldScene) LoadSystems(world *ecs.World) {
 	engo.Input.RegisterButton(systems.INPUT_SHOW_INVENTORY_DIALOG, engo.KeyF)
 	engo.Input.RegisterButton(systems.INPUT_HIDE_DIALOG, engo.KeyG)
 
+}
+
+
+func logMsg(eventChan chan eventsystem.BaseEvent) {
+	for true {
+		msg := <-eventChan
+		if msg.Type() != events.MOVEMENT_STEP_EVENT_NAME && msg.Type() != events.TICK_EVENT {
+			fmt.Println(msg.Type(), msg.AsLogMessage())
+		}
+	}
 }

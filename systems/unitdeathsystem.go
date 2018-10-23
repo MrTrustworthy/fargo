@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
@@ -17,8 +18,8 @@ func (uds *UnitDeathSystem) New(world *ecs.World) {
 	eventsystem.Mailbox.Listen(events.UNIT_DEATH_EVENT, uds.getHandleUnitDeathEvent())
 }
 
-func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uds *UnitDeathSystem) getHandleUnitDeathEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		udmsg, ok := msg.(events.UnitDeathEvent)
 		if !ok {
 			return

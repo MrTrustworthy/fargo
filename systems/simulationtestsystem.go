@@ -23,8 +23,8 @@ func (sts *SimulationTestSystem) New(world *ecs.World) {
 	eventsystem.Mailbox.Listen(events.TEST_LOOT_TOO_FAR_EVENT, sts.getHandleKillAndLootTooFarEvent())
 }
 
-func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		if _, ok := msg.(events.TestBasicAttackEvent); !ok {
 			return
 		}
@@ -40,7 +40,7 @@ func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg eventsyst
 		eventsystem.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB})
 
-		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 			AssertAbilitySuccessful(msg,true)
 			Assert(unitA.AP == unitB.AP-unitA.SelectedAbility.Cost()-1, "Unit A should have lost different amount of AP")
 			Assert(unitB.Health == unitA.Health-unitA.SelectedAbility.Damage(), "Unit B should have lost Health")
@@ -54,8 +54,8 @@ func (sts *SimulationTestSystem) getHandleSimpleAttackEvent() func(msg eventsyst
 	}
 }
 
-func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 
 		if _, ok := msg.(events.TestKillAndLootEvent); !ok {
 			return
@@ -73,28 +73,28 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 		eventsystem.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // First attack
 
-		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 			AssertAbilitySuccessful(msg,true)
 			fmt.Println("Test 2: First Attack Completed")
-			eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+			eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 				AssertAbilitySuccessful(msg,true)
 				fmt.Println("Test 2: Second Attack Completed")
-				eventsystem.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg eventsystem.BaseEvent) {
+				eventsystem.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg engo.Message) {
 					fmt.Println("Test 2: Third Attack, Unit Death and Loot Spawn Completed")
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
 					lootPos := lootMsg.Lootpack.SpaceComponent.Center()
 
-					eventsystem.Mailbox.ListenOnce(events.DIALOG_SHOWN_EVENT, func(msg eventsystem.BaseEvent) {
+					eventsystem.Mailbox.ListenOnce(events.DIALOG_SHOWN_EVENT, func(msg engo.Message) {
 						fmt.Println("Test 2: PickupDialog shown")
 
 						// dialog_shown is re-triggered when the lootbox dialog updates again
-						eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_ITEM_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+						eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_ITEM_COMPLETED_EVENT, func(msg engo.Message) {
 							fmt.Println("Test 2: First item picked up")
 
 							// Need to wait for one tick or weird things start to happen
-							eventsystem.Mailbox.ListenOnce(events.TICK_EVENT, func(msg eventsystem.BaseEvent) {
+							eventsystem.Mailbox.ListenOnce(events.TICK_EVENT, func(msg engo.Message) {
 
-								eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+								eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg engo.Message) {
 									fmt.Println("Test 2: Loot completely picked up")
 									if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
 										Assert(lmsg.Successful, "Loot pickup should have been successful")
@@ -127,8 +127,8 @@ func (sts *SimulationTestSystem) getHandleKillAndLootEvent() func(msg eventsyste
 	}
 }
 
-func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		if _, ok := msg.(events.TestCollisionEvent); !ok {
 			return
 		}
@@ -144,14 +144,14 @@ func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg eventsystem.
 		eventsystem.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: goal})
 
-		eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+		eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 			centerA, centerB := unitA.Center(), unitB.Center()
 			distance := centerA.PointDistance(centerB)
 			Assert(distance < 70 && distance >= 64, "Unit A should be stuck")
 			fmt.Println("Test 3: Unit is stuck now")
 
 			// now that we're stuck, let's try to move back to the origin
-			eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+			eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 				Assert(unitA.Center() == posA, "Unit A should have made it back to its origin")
 				fmt.Println("Test 3: getHandleCollisionEvent passed")
 				eventsystem.Mailbox.Dispatch(events.TestNoAPAttackEvent{})
@@ -164,8 +164,8 @@ func (sts *SimulationTestSystem) getHandleCollisionEvent() func(msg eventsystem.
 	}
 }
 
-func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		if _, ok := msg.(events.TestNoAPAttackEvent); !ok {
 			return
 		}
@@ -181,7 +181,7 @@ func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg eventsystem
 		eventsystem.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB})
 
-		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 			AssertAbilitySuccessful(msg, false)
 			fmt.Println("Test 4: getHandleNoAPAttackEvent passed")
 			eventsystem.Mailbox.Dispatch(events.TestLootTooFarEvent{})
@@ -191,8 +191,8 @@ func (sts *SimulationTestSystem) getHandleNoAPAttackEvent() func(msg eventsystem
 }
 
 
-func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 
 		if _, ok := msg.(events.TestLootTooFarEvent); !ok {
 			return
@@ -208,17 +208,17 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 		eventsystem.Mailbox.Dispatch(events.InputSelectEvent{Point: posA})
 		eventsystem.Mailbox.Dispatch(events.InputInteractEvent{Unit: unitA, Point: posB}) // First attack
 
-		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+		eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 			AssertAbilitySuccessful(msg,true)
 			fmt.Println("Test 5: First Attack Completed")
-			eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+			eventsystem.Mailbox.ListenOnce(events.ABILITY_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 				AssertAbilitySuccessful(msg,true)
 				fmt.Println("Test 5: Second Attack Completed")
-				eventsystem.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg eventsystem.BaseEvent) {
+				eventsystem.Mailbox.ListenOnce(events.LOOT_HAS_SPAWNED_EVENT, func(msg engo.Message) {
 					fmt.Println("Test 5: Third Attack, Unit Death and Loot Spawn Completed")
 					lootMsg, _ := msg.(events.LootHasSpawnedEvent)
 
-					eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg eventsystem.BaseEvent) {
+					eventsystem.Mailbox.ListenOnce(events.LOOT_PICKUP_COMPLETED_EVENT, func(msg engo.Message) {
 						if lmsg, ok := msg.(events.LootPickupCompletedEvent); ok {
 							Assert(!lmsg.Successful, "Loot pickup should have failed")
 						}
@@ -238,7 +238,7 @@ func (sts *SimulationTestSystem) getHandleKillAndLootTooFarEvent() func(msg even
 	}
 }
 
-func AssertAbilitySuccessful(msg eventsystem.BaseEvent, success bool) {
+func AssertAbilitySuccessful(msg engo.Message, success bool) {
 	if lmsg, ok := msg.(events.AbilityCompletedEvent); ok {
 		Assert(lmsg.Successful == success, "Ability should have completed with success:" + strconv.FormatBool(success))
 	}

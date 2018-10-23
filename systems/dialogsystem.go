@@ -21,8 +21,8 @@ func (ds *DialogSystem) New(world *ecs.World) {
 	eventsystem.Mailbox.Listen(events.DIALOG_CLICK_EVENT, ds.getHandleDialogClick())
 }
 
-func (ds *DialogSystem) getHandleShowDialog() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ds *DialogSystem) getHandleShowDialog() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		dsmsg, ok := msg.(events.DialogShowEvent)
 		if !ok {
 			return
@@ -34,15 +34,15 @@ func (ds *DialogSystem) getHandleShowDialog() func(msg eventsystem.BaseEvent) {
 	}
 }
 
-func (ds *DialogSystem) getHandleHideDialog() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ds *DialogSystem) getHandleHideDialog() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		ds.EnsureCurrentDialogClosed()
 		ds.currentDialog = nil
 	}
 }
 
-func (ds *DialogSystem) getHandleDialogClick() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ds *DialogSystem) getHandleDialogClick() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		dce, ok := msg.(events.DialogClickEvent)
 		if !ok {
 			return

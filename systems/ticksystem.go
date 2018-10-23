@@ -13,9 +13,7 @@ type TickSystem struct {
 
 
 func (is *TickSystem) Update(dt float32) {
-
 	eventsystem.Mailbox.Dispatch(events.TickEvent{})
-
 }
 
 func (is *TickSystem) Remove(e ecs.BasicEntity) {}

@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
 )
@@ -15,8 +16,8 @@ func (uis *UnitInteractionSystem) New(world *ecs.World) {
 	eventsystem.Mailbox.Listen(events.INPUT_INTERACT_EVENT_NAME, uis.getHandleInputEvent())
 }
 
-func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uis *UnitInteractionSystem) getHandleInputEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		imsg, ok := msg.(events.InputInteractEvent)
 		if !ok {
 			return

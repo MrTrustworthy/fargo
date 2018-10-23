@@ -26,8 +26,8 @@ func (ums *UnitMovementSystem) New(world *ecs.World) {
 
 }
 
-func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		amsg, ok := msg.(events.MovementRequestEvent)
 		if !ok {
 			return
@@ -40,8 +40,8 @@ func (ums *UnitMovementSystem) getHandleInteractionEvent() func(msg eventsystem.
 	}
 }
 
-func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ums *UnitMovementSystem) getHandleCollisionEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		cmsg, ok := msg.(events.CollisionEvent)
 		if !ok {
 			return

@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
@@ -19,8 +20,8 @@ func (uas *UnitAbilitySystem) New(world *ecs.World) {
 
 }
 
-func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (uas *UnitAbilitySystem) getHandleRequestAbilityEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		raue, ok := msg.(events.RequestAbilityUseEvent)
 		if !ok {
 			return
@@ -57,7 +58,7 @@ func (uas *UnitAbilitySystem) executeAbility(raue *events.RequestAbilityUseEvent
 
 func moveCloserAndRetryAbility(raue *events.RequestAbilityUseEvent) {
 	source, target := (*raue.Ability).Source(), (*raue.Ability).Target()
-	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
 			eventsystem.Mailbox.Dispatch(*raue)
 		} else {

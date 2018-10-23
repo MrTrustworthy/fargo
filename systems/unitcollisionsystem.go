@@ -2,6 +2,7 @@ package systems
 
 import (
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
 )
@@ -18,8 +19,8 @@ func (ucs *UnitCollisionSystem) New(world *ecs.World) {
 // The collision systems works as follows: Each step of a movement, the moving unit is checked against all other units.
 // If a collision is detected, a CollisionEvent is sent. In that case, the MovementSystem is responsible for handling
 // the collision by cancelling the movement and resetting the unit to its last known good position.
-func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (ucs *UnitCollisionSystem) getHandleMoveStepEvent() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		mmsg, ok := msg.(events.MovementStepEvent)
 		if !ok {
 			return

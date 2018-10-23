@@ -27,8 +27,8 @@ func (lss *LootManagementSystem) New(world *ecs.World) {
 
 }
 
-func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		udmsg, ok := msg.(events.RequestLootSpawn)
 		if !ok {
 			return
@@ -41,8 +41,8 @@ func (lss *LootManagementSystem) getHandleRequestLootSpawn() func(msg eventsyste
 	}
 }
 
-func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (lss *LootManagementSystem) getHandleRequestLootPickup() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		rlpe, ok := msg.(events.RequestLootPickupEvent)
 		if !ok {
 			return
@@ -68,8 +68,8 @@ func (lss *LootManagementSystem) ensurePickupDialog(unit *entities.Unit, lootpac
 	eventsystem.Mailbox.Dispatch(events.DialogShowEvent{Dialog: dialog})
 }
 
-func (lss *LootManagementSystem) getHandleItemPickup() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (lss *LootManagementSystem) getHandleItemPickup() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		rlipe, ok := msg.(events.RequestLootItemPickupEvent)
 		if !ok {
 			return
@@ -103,7 +103,7 @@ func (lss *LootManagementSystem) getHandleItemPickup() func(msg eventsystem.Base
 }
 
 func moveCloserAndRetryPickup(pickupEvent *events.RequestLootPickupEvent) {
-	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg eventsystem.BaseEvent) {
+	eventsystem.Mailbox.ListenOnce(events.MOVEMENT_COMPLETED_EVENT_NAME, func(msg engo.Message) {
 		if cmsg, ok := msg.(events.MovementCompletedEvent); ok && cmsg.Successful {
 			eventsystem.Mailbox.Dispatch(*pickupEvent)
 		} else {

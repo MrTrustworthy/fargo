@@ -22,8 +22,8 @@ func (is *UnitInventorySystem) New(world *ecs.World) {
 
 }
 
-func (is *UnitInventorySystem) getHandleShowInventory() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (is *UnitInventorySystem) getHandleShowInventory() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		simsg, ok := msg.(events.ShowInventoryEvent)
 		if !ok || simsg.Unit == nil {
 			return
@@ -32,8 +32,8 @@ func (is *UnitInventorySystem) getHandleShowInventory() func(msg eventsystem.Bas
 		eventsystem.Mailbox.Dispatch(events.DialogShowEvent{Dialog: inventoryDialog})
 	}
 }
-func (is *UnitInventorySystem) getHandleInventoryItemClicked() func(msg eventsystem.BaseEvent) {
-	return func(msg eventsystem.BaseEvent) {
+func (is *UnitInventorySystem) getHandleInventoryItemClicked() func(msg engo.Message) {
+	return func(msg engo.Message) {
 		simsg, ok := msg.(events.InventoryElementClickedEvent)
 		if !ok || simsg.Unit == nil {
 			return
