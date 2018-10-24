@@ -11,17 +11,19 @@ import (
 
 type UnitCreationSystem struct {
 	*ecs.World
-	*TaskQueue
+	currentCreateUnitEvent *events.InputCreateunitEvent
 }
 
 func (ucs *UnitCreationSystem) New(world *ecs.World) {
 	ucs.World = world
-	ucs.TaskQueue = &TaskQueue{}
 	eventsystem.Mailbox.Listen(events.INPUT_CREATEUNIT_EVENT_NAME, ucs.getHandleInputEvent())
 }
 
 func (ucs *UnitCreationSystem) Update(dt float32) {
-	ucs.TaskQueue.RunNext()
+	if ucs.currentCreateUnitEvent != nil {
+		ucs.createRandomUnit(*ucs.currentCreateUnitEvent)
+		ucs.currentCreateUnitEvent = nil
+	}
 }
 
 func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
@@ -30,17 +32,19 @@ func (ucs *UnitCreationSystem) getHandleInputEvent() func(msg engo.Message) {
 		if !ok {
 			return
 		}
-		ucs.AddTask(NewTask(createRandomUnit, ucs, imsg.Point))
+		if ucs.currentCreateUnitEvent != nil {
+			fmt.Println("WARNING: Trying to add CreateUnitEvent even though there is already one pending")
+			return
+		}
+		ucs.currentCreateUnitEvent = &imsg
 	}
 }
 
 func (ucs *UnitCreationSystem) Remove(e ecs.BasicEntity) {}
 
-func createRandomUnit(args ...interface{}) {
-	ucs := args[0].(*UnitCreationSystem)
-	point := args[1].(engo.Point)
+func (ucs *UnitCreationSystem) createRandomUnit(msg events.InputCreateunitEvent) {
 	unit := entities.NewUnit()
-	unit.SetCenter(point)
+	unit.SetCenter(msg.Point)
 	fmt.Println("name of the new unit is", unit.Name)
 	AddToRenderSystem(ucs.World, unit)
 	AddToAnimationSystem(ucs.World, unit)
