@@ -4,6 +4,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"errors"
+	"fmt"
 	"github.com/MrTrustworthy/fargo/entities"
 	"github.com/MrTrustworthy/fargo/events"
 	"github.com/MrTrustworthy/fargo/eventsystem"
@@ -13,6 +14,8 @@ type UnitTrackingSystem struct {
 	Units        []*entities.Unit
 	SelectedUnit *entities.Unit
 	*ecs.World
+	currentSelectEvent *events.InputSelectEvent
+
 }
 
 func (ss *UnitTrackingSystem) AddUnit(unit *entities.Unit) {
@@ -28,26 +31,40 @@ func (ss *UnitTrackingSystem) New(world *ecs.World) {
 
 }
 
+func (ss *UnitTrackingSystem) Update(dt float32) {
+	if ss.currentSelectEvent != nil {
+		ss.handleInputEvent(ss.currentSelectEvent)
+		ss.currentSelectEvent = nil
+	}
+}
+
 func (ss *UnitTrackingSystem) getHandleInputEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		imsg, ok := msg.(events.InputSelectEvent)
 		if !ok {
 			return
 		}
-
-		if ss.SelectedUnit != nil {
-			deselectedUnit := ss.SelectedUnit
-			ss.SelectedUnit = nil
-			eventsystem.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
+		if ss.currentSelectEvent != nil {
+			fmt.Println("WARNING: Trying to add InputSelectEvent even though there is already one pending")
+			return
 		}
-
-		if unit, err := ss.findUnitUnderMouse(imsg.Point); err == nil {
-			ss.SelectedUnit = unit
-			eventsystem.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
-		}
+		ss.currentSelectEvent = &imsg
 	}
 }
 
+func (ss *UnitTrackingSystem) handleInputEvent(msg *events.InputSelectEvent) {
+
+	if ss.SelectedUnit != nil {
+		deselectedUnit := ss.SelectedUnit
+		ss.SelectedUnit = nil
+		eventsystem.Mailbox.Dispatch(events.SelectionDeselectedEvent{Unit: deselectedUnit})
+	}
+
+	if unit, err := ss.findUnitUnderMouse(msg.Point); err == nil {
+		ss.SelectedUnit = unit
+		eventsystem.Mailbox.Dispatch(events.SelectionSelectedEvent{Unit: unit})
+	}
+}
 func (ss *UnitTrackingSystem) getHandleSelectEvent() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		smsg, ok := msg.(events.SelectionSelectedEvent)
@@ -78,7 +95,6 @@ func (ss *UnitTrackingSystem) getHandleRemoveUnitEvent() func(msg engo.Message) 
 	}
 }
 
-func (ss *UnitTrackingSystem) Update(dt float32) {}
 
 func (ss *UnitTrackingSystem) findUnitUnderMouse(point engo.Point) (*entities.Unit, error) {
 	for _, unit := range ss.Units {

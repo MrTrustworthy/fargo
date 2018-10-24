@@ -13,6 +13,7 @@ import (
 
 type UnitInventorySystem struct {
 	*ecs.World
+	currentDamageEvent *events.DialogShowEvent
 }
 
 func (is *UnitInventorySystem) New(world *ecs.World) {
@@ -22,16 +23,33 @@ func (is *UnitInventorySystem) New(world *ecs.World) {
 
 }
 
+func (is *UnitInventorySystem) Update(dt float32) {
+	if is.currentDamageEvent != nil {
+		is.handleShowInventory(is.currentDamageEvent)
+		is.currentDamageEvent = nil
+	}
+}
+
 func (is *UnitInventorySystem) getHandleShowInventory() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		simsg, ok := msg.(events.ShowInventoryEvent)
 		if !ok || simsg.Unit == nil {
 			return
 		}
+
+		if is.currentDamageEvent != nil {
+			fmt.Println("WARNING: Trying to add ShowInventoryEvent even though there is already one pending")
+			return
+		}
 		inventoryDialog := CreateInventoryDialog(simsg.Unit)
-		eventsystem.Mailbox.Dispatch(events.DialogShowEvent{Dialog: inventoryDialog})
+		is.currentDamageEvent = &events.DialogShowEvent{Dialog: inventoryDialog}
 	}
 }
+
+func (is *UnitInventorySystem) handleShowInventory(msg *events.DialogShowEvent) {
+	engo.Mailbox.Dispatch(msg)
+}
+
 func (is *UnitInventorySystem) getHandleInventoryItemClicked() func(msg engo.Message) {
 	return func(msg engo.Message) {
 		simsg, ok := msg.(events.InventoryElementClickedEvent)
@@ -65,5 +83,4 @@ func CreateInventoryDialog(unit *entities.Unit) *ui.Dialog {
 	return d
 }
 
-func (is *UnitInventorySystem) Update(dt float32)        {}
 func (is *UnitInventorySystem) Remove(e ecs.BasicEntity) {}
